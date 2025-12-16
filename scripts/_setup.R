@@ -57,30 +57,30 @@ read_csv2("data/dm3.csv")[-1] |>
 
 df_setup <-
 df_base |>
-  mutate(across(c(cat1, cat2),
-                ~ if_else(str_detect(., "Cancer"), NA, .)),
-         across(all_of(.diag),
-                ~ if_else(. == "Yes", "1", "0") |>
-                  as.numeric()),
-         across(ends_with(c("weight", "pam", "fc", "fr")),
-                ~ na_if(., 0)),
-         rhc = if_else(rhc == "RHC", 1, 0),
-         ethnic = str_to_title(ethnic),
-         educ = round(educ),
-         dnr = if_else(dnr == "Yes", 1, 0),
-         score_gcs = 15 - score_gcs * 0.12,
-         bio_bili = bio_bili * 17.1,
-         bio_creat = bio_creat * 88.4,
-         org_fail =
-           case_when(if_all(c(cat1, cat2), is.na) ~ "Aucune",
-                     !str_detect(cat1, "MOSF") & !is.na(cat1) & is.na(cat2) |
-                     !str_detect(cat2, "MOSF") & !is.na(cat2) & is.na(cat1) ~ "Uni",
-                     .default = "Multi") |>
-           fct_relevel("Aucune", "Uni", "Multi"),
-         tt_discharge = as.numeric(dschdte - sadmdte),
-         tt_death = as.numeric(dthdte - sadmdte),
-         ev_death_30 = case_when(tt_death <= 30 ~ 1, .default = 0),
-         ev_death_180 = case_when(tt_death <= 180 ~ 1, .default = 0)) |>
+  mutate(
+    across(c(cat1, cat2), ~ if_else(str_detect(., "Cancer"), NA, .)),
+    across(all_of(.diag), ~ if_else(. == "Yes", "1", "0") |> as.numeric()),
+    across(ends_with(c("weight", "pam", "fc", "fr")), ~ na_if(., 0)),
+    rhc = if_else(rhc == "RHC", 1, 0),
+    ethnic = str_to_title(ethnic),
+    educ = round(educ),
+    dnr = if_else(dnr == "Yes", 1, 0),
+    score_gcs = 15 - score_gcs * 0.12,
+    bio_bili = bio_bili * 17.1,
+    bio_creat = bio_creat * 88.4,
+    org_fail =
+      case_when(
+        if_all(c(cat1, cat2), is.na) ~ "Aucune",
+        !str_detect(cat1, "MOSF") & !is.na(cat1) & is.na(cat2) |
+        !str_detect(cat2, "MOSF") & !is.na(cat2) & is.na(cat1) ~ "Uni",
+        .default = "Multi"
+      ) |>
+        fct_relevel("Aucune", "Uni", "Multi"),
+    tt_discharge = as.numeric(dschdte - sadmdte),
+    tt_death = as.numeric(dthdte - sadmdte),
+    ev_death_30 = case_when(tt_death <= 30 ~ 1, .default = 0),
+    ev_death_180 = case_when(tt_death <= 180 ~ 1, .default = 0)
+  ) |>
   easy_fct(sex,
            "Homme" = "Male",
            "Femme" = "Female") |>
@@ -123,11 +123,11 @@ df_base |>
   easy_fct(bio_sodium, 135, 145) |>
   easy_fct(bio_kalium, 3.5, 5) |>
   easy_fct(bio_hema, 40, 50) |>
-  rowwise() |>
-    mutate(n_diag = sum(across(all_of(.diag))),
-           n_comorb = sum(across(ends_with("hx")))) |>
-    ungroup() |>
-  mutate(across(c(n_diag, n_comorb), as_factor)) |>
+  mutate(
+    n_diag = rowSums(across(all_of(.diag))),
+    n_comorb = rowSums(across(ends_with("hx"))),
+    across(c(n_diag, n_comorb), as_factor)
+  ) |>
   set_variable_labels(!!!with(.labels, c(base$label, new))) |>
   select(where(~ !is.null(label_attribute(.))), -age)
 
@@ -160,16 +160,15 @@ opts$view$data |>
 
 ### BV VARS --------------------------------------------------------------------
 
-.bv <-
-  list(
-    group = list(
-      demo = c("sex", "age_cat", "ethnic", "educ", "income", "insur"),
-      atcd = c("n_diag", "n_comorb", "cancer", "org_fail"),
-      pv = str_subset(opts$data$ql$vars, "pv_"),
-      bio = str_subset(opts$data$ql$vars, "bio_")
-    ),
-    vars = c("ev_death_30", "rhc")
-  )
+.bv <- lst(
+  group = lst(
+    demo = c("sex", "age_cat", "ethnic", "educ", "income", "insur"),
+    atcd = c("n_diag", "n_comorb", "cancer", "org_fail"),
+    pv = str_subset(opts$data$ql$vars, "pv_"),
+    bio = str_subset(opts$data$ql$vars, "bio_")
+  ),
+  vars = c("ev_death_30", "rhc")
+)
 
 ### SP -------------------------------------------------------------------------
 
