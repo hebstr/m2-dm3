@@ -8,11 +8,13 @@
 .predictors[, "tt_death"] <- 0
 
 df_imp <-
-df_setup |>
-  mice(m = 10,
-       maxit = 5,
-       predictorMatrix = .predictors,
-       method = .method) |>
+  df_setup |>
+  mice(
+    m = 10,
+    maxit = 5,
+    predictorMatrix = .predictors,
+    method = .method
+  ) |>
   complete() |>
   as_tibble()
 

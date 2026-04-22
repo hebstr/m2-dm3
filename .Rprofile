@@ -1,11 +1,10 @@
 source("renv/activate.R")
-
-# renv::install("~/Documents/pro/r_pkg/pkg_hebstr/", prompt = FALSE)
+source("~/.Rprofile")
 
 library(tidyverse) |> suppressPackageStartupMessages()
 library(tidymodels) |> suppressPackageStartupMessages()
-library(rlang, warn.conflicts = F)
-library(mice, warn.conflicts = F)
+library(rlang, warn.conflicts = FALSE)
+library(mice, warn.conflicts = FALSE)
 library(glue)
 library(labelled)
 library(gtsummary)

@@ -1,36 +1,50 @@
-tbl_bv_qt <- \(var) {
-
-### QT -------------------------------------------------------------------------
-
-  df_setup |>
+tbl_bv_qt_fun <- \(var) {
+  .tbl <- df_setup |>
     use_vars() |>
     tbl_summary(
       include = opts$data$qt$vars$total,
-      by = all_of(var),
+      by = !!var,
       statistic = opts$vars$stat,
       digits = list(~1, proba_surv ~ 2),
       missing = "no"
     ) |>
     add_stat_label(label = opts$vars$label) |>
     gtsum_format() |>
-    gt_format(width = 750) |>
-    easy_out(filename = glue("tbl_bv_{var}_qt"))
+    gt_format()
 
-### BIN ------------------------------------------------------------------------
+  clear_vars()
 
+  .tbl
+}
+
+tbl_bv_bin_fun <- \(var) {
   df_setup |>
     tbl_summary(
       include = opts$data$bin$vars,
-      by = all_of(var),
+      by = !!var,
       statistic = opts$vars$stat[[3]],
       digits = opts$digit,
       missing = "no"
     ) |>
     add_stat_label() |>
     gtsum_format() |>
-    gt_format(width = 720) |>
-    easy_out(filename = glue("tbl_bv_{var}_bin"))
-
+    gt_format()
 }
 
-walk(.bv$vars, tbl_bv_qt)
+tbl_bv_qt_params <- list(qt = 750, bin = 720)
+
+tbl_bv_qt <- list(
+  qt = map(set_names(.bv$vars), tbl_bv_qt_fun),
+  bin = map(set_names(.bv$vars), tbl_bv_bin_fun)
+)
+
+iwalk(
+  tbl_bv_qt,
+  \(tbls, type) {
+    easy_out_map(
+      x = set_names(tbls, ~ glue("{type}_{.}")),
+      filename = "tbl_bv_qt",
+      width = tbl_bv_qt_params[[type]]
+    )
+  }
+)

@@ -15,19 +15,23 @@ filters:
 format:
   hebstr-template-html:
     code-tools:
-      source: https://codeberg.org/hebstr/m2_dm3/src/branch/main/
+      source: https://github.com/hebstr/m2-dm3
   hebstr-template-typst: default
 ---
 
 ```{r}
 #| include: false
-
 library(knitr)
 library(gt)
 
+options(easy_out.quiet = TRUE)
+
 conflicted::conflict_prefer("filter", "dplyr")
 
-quiet <- TRUE
+.gt_format <- hebstr::gt_format
+gt_format <- \(x, ..., font_size = 16, row_padding = 10) {
+  .gt_format(x, font_size = font_size, row_padding = row_padding, ...)
+}
 
 source(here::here("scripts", "_setup.R"))
 
@@ -73,18 +77,19 @@ Aucun large language model n'est utilisé pour la rédaction du code ou du texte
 # Data management
 
 ```{r}
-.labels_qmd <-
-list(ptid = "identifiant patient",
-     cat1 = "cat. diag. principale",
-     cat2 = "cat. diag. secondaire",
-     sadmdte = "date d'admission",
-     dschdte = "date de sortie",
-     lstctdte = "date de dernier contact",
-     dthdte = "date de décès",
-     death = "décès",
-     adld3p = "échelle ADL",
-     alb1 = "albuminémie",
-     urin1 = "diurèse")
+.labels_qmd <- list(
+  ptid = "identifiant patient",
+  cat1 = "cat. diag. principale",
+  cat2 = "cat. diag. secondaire",
+  sadmdte = "date d'admission",
+  dschdte = "date de sortie",
+  lstctdte = "date de dernier contact",
+  dthdte = "date de décès",
+  death = "décès",
+  adld3p = "échelle ADL",
+  alb1 = "albuminémie",
+  urin1 = "diurèse"
+)
 
 df_qmd <- df_base |> set_variable_labels(!!!.labels_qmd)
 ```
@@ -99,12 +104,8 @@ Les variables suivantes contenaient des valeurs numériques **égales à 0 et ju
 
 ```{r}
 opts$view$data |>
-  filter(!is.na(n_miss),
-         str_ends(variable, "weight|pam|fc|fr")) |>
-  select(variable,
-         label,
-         n_ab = n_miss,
-         p_ab = p_miss) |>
+  filter(!is.na(n_miss), str_ends(variable, "weight|pam|fc|fr")) |>
+  select(variable, label, n_ab = n_miss, p_ab = p_miss) |>
   gt_qmd()
 ```
 
@@ -128,9 +129,7 @@ Le nombre d'occurrence de la variable binaire `death`, correspondant au statut "
 ```{r}
 #| echo: true
 #| code-fold: false
-
-identical(sum(df_base$death == "Yes"),
-          sum(!is.na(df_base$dthdte)))
+identical(sum(df_base$death == "Yes"), sum(!is.na(df_base$dthdte)))
 ```
 
 Ainsi il était possible d'affirmer que les dates de décès manquantes correspondaient à la **non-survenue du décès**.
@@ -146,7 +145,6 @@ Selon la documentation fournie, la variable binaire `death` était renseignée c
 ```{r}
 #| echo: true
 #| code-fold: false
-
 count(df_base, death)
 ```
 
@@ -155,11 +153,8 @@ Le calcul *de novo* d'une variable **"mortalité à 180 jours"** rapportait des 
 ```{r}
 #| echo: true
 #| code-fold: false
-
 df_base |>
-  count(death_180 =
-          case_when(as.numeric(dthdte - sadmdte) <= 180 ~ "Yes",
-                    .default = "No"))
+  count(death_180 = case_when(as.numeric(dthdte - sadmdte) <= 180 ~ "Yes", .default = "No"))
 ```
 
 Par conséquent la variable `death` correspondait bien, comme son nom l'indique, à la **mortalité toutes périodes confondues**, [et non à la mortalité à 180 jours comme l'indiquait son libellé]{.cb2}.
@@ -176,15 +171,16 @@ Les modalités des variables catégorielles `cat1` et `cat2` étaient les suivan
 
 ```{r}
 .val_cat <-
-exprs(cat1, cat2) |>
-  map(~ df_base |>
-        count(!!., sort = TRUE) |>
-        rename(!!.labels_qmd[[.]] := 1))
+  exprs(cat1, cat2) |>
+  map(
+    ~ df_base |>
+      count(!!., sort = TRUE) |>
+      rename(!!.labels_qmd[[.]] := 1)
+  )
 ```
 
 ```{r}
 #| layout-ncol: 2
-
 gt_qmd(.val_cat[[1]])
 
 gt_qmd(.val_cat[[2]])
@@ -197,7 +193,6 @@ Chez les sujets ayant au moins une occurrence **"cancer"** en `cat1` ou `cat2`, 
 ```{r}
 #| echo: true
 #| code-fold: false
-
 df_base |>
   filter(if_any(c(cat1, cat2), str_detect, "Cancer")) |>
   count(cancer)
@@ -265,7 +260,6 @@ Aucune erreur logique ne fut retrouvée.
 ```{r}
 #| echo: true
 #| code-fold: false
-
 df_base |>
   filter(dschdte < sadmdte | dthdte < dschdte) |>
   nrow()
@@ -288,15 +282,19 @@ Certaines variables ont été exclues du jeu de données pour trois raisons.
 
 ```{r}
 exclus_list <-
-list(trop_miss = c("adld3p", "urin1"),
-     pas_interp = c("lstctdte", "alb1"),
-     pas_util = c("ptid", "cat1", "cat2", "sadmdte", "dschdte", "dthdte", "death")) |>
-  map(~ df_qmd |>
-        relocate(names(.labels_qmd)) |>
-        easy_view() |>
-        pluck("data") |>
-        filter(variable %in% .) |>
-        select(where(~ !is_null(unlist(.))), -pos))
+  list(
+    trop_miss = c("adld3p", "urin1"),
+    pas_interp = c("lstctdte", "alb1"),
+    pas_util = c("ptid", "cat1", "cat2", "sadmdte", "dschdte", "dthdte", "death")
+  ) |>
+  map(
+    ~ df_qmd |>
+      relocate(names(.labels_qmd)) |>
+      easy_view() |>
+      pluck("data") |>
+      filter(variable %in% .) |>
+      select(where(~ !is_null(unlist(.))), -pos)
+  )
 ```
 
 1. **Excès de valeurs manquantes** :
@@ -343,19 +341,27 @@ opts$view$output
 
 ```{r}
 .title_descr_base <-
-map(c(demo = "variables sociodémographiques",
+  map(
+    c(
+      demo = "variables sociodémographiques",
       atcd = "antécédents et comorbidités",
       pv = "paramètres vitaux",
       bio = "paramètres biologiques",
       bin = "variables binaires",
-      qt = "variables continues"),
-    ~ glue("Caractéristiques des {.}"))
+      qt = "variables continues"
+    ),
+    ~ glue("Caractéristiques des {.}")
+  )
 
 .title_descr <-
-map(c(uv = ".",
+  map(
+    c(
+      uv = ".",
       death = " selon la mortalité à 30 jours.",
-      rhc = " selon la pose de cathétérisme droit."),
-    ~ glue("{.title_descr_base}{.}"))
+      rhc = " selon la pose de cathétérisme droit."
+    ),
+    ~ glue("{.title_descr_base}{.}")
+  )
 ```
 
 # Analyse descriptive univariée
@@ -374,16 +380,13 @@ Les variables catégorielles ont pu être regroupées en 4 catégories :
 #| out-width: 90%
 #| fig-align: center
 #| fig-cap: !expr '.title_uv_demo'
-
 .acro <-
-opts$acro |>
+  opts$acro |>
   with(mget(str_subset(names(opts$acro), str_u(levels(df_setup$insur))))) |>
   acro_str(collapse = opts$sep$ext)
 
 .title_uv_demo <-
-str_fig(title = .title_descr$uv[1],
-        acro = .acro,
-        qmd = TRUE)
+  str_fig(title = .title_descr$uv[1], acro = .acro, qmd = TRUE)
 
 include_graphics("output/fig_uv_demo.png")
 ```
@@ -393,7 +396,6 @@ include_graphics("output/fig_uv_demo.png")
 ```{r}
 #| label: fig-uv-atcd
 #| fig-cap: !expr ".title_descr$uv[2]"
-
 include_graphics("output/fig_uv_atcd.png")
 ```
 
@@ -403,7 +405,6 @@ include_graphics("output/fig_uv_atcd.png")
 #| label: fig-uv-pv
 #| out-width: 85%
 #| fig-cap: !expr ".title_descr$uv[3]"
-
 include_graphics("output/fig_uv_pv.png")
 ```
 
@@ -413,7 +414,6 @@ include_graphics("output/fig_uv_pv.png")
 #| label: fig-uv-bio
 #| out-width: 85%
 #| fig-cap: !expr ".title_descr$uv[4]"
-
 include_graphics("output/fig_uv_bio.png")
 ```
 
@@ -422,14 +422,12 @@ include_graphics("output/fig_uv_bio.png")
 ```{r}
 #| label: tbl-uv-bin
 #| tbl-cap: !expr '.title_descr$uv[5]'
-
 tbl_uv_bin
 ```
 
 ```{r}
 #| label: tbl-uv-qt
 #| tbl-cap: !expr '.title_descr$uv[6]'
-
 tbl_uv_qt
 ```
 
@@ -451,47 +449,41 @@ L'analyse précédente a été reproduite après croisement sur 2 variables :
 `r add_script("tbl_bv_ql.R", suffix = "(1)")`
 
 ```{r}
-#| label: tbl-bv-ev-death-30-demo
+#| label: tbl-bv-ql-demo-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[1]"
-
-tbl_bv_ev_death_30_demo
+tbl_bv_ql$demo$demo_ev_death_30
 ```
 
 ```{r}
-#| label: tbl-bv-ev-death-30-atcd
+#| label: tbl-bv-ql-atcd-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[2]"
-
-tbl_bv_ev_death_30_atcd
+tbl_bv_ql$atcd$atcd_ev_death_30
 ```
 
 ```{r}
-#| label: tbl-bv-ev-death-30-pv
+#| label: tbl-bv-ql-pv-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[3]"
-
-tbl_bv_ev_death_30_pv
+tbl_bv_ql$pv$pv_ev_death_30
 ```
 
 ```{r}
-#| label: tbl-bv-ev-death-30-bio
+#| label: tbl-bv-ql-bio-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[4]"
-
-tbl_bv_ev_death_30_bio
+tbl_bv_ql$bio$bio_ev_death_30
 ```
 
 `r add_script("tbl_bv_qt.R", suffix = "(1)")`
 
 ```{r}
-#| label: tbl-bv-ev-death-30-bin
+#| label: tbl-bv-qt-bin-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[5]"
-
-tbl_bv_ev_death_30_bin
+tbl_bv_qt$bin$ev_death_30
 ```
 
 ```{r}
-#| label: tbl-bv-ev-death-30-qt
+#| label: tbl-bv-qt-qt-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[6]"
-
-tbl_bv_ev_death_30_qt
+tbl_bv_qt$qt$ev_death_30
 ```
 
 ## Cathétérisme droit
@@ -499,47 +491,41 @@ tbl_bv_ev_death_30_qt
 `r add_script("tbl_bv_ql.R", suffix = "(2)")`
 
 ```{r}
-#| label: tbl-bv-rhc-demo
+#| label: tbl-bv-ql-rhc-demo
 #| tbl-cap: !expr ".title_descr$rhc[1]"
-
-tbl_bv_rhc_demo
+tbl_bv_ql$demo$demo_rhc
 ```
 
 ```{r}
-#| label: tbl-bv-rhc-atcd
+#| label: tbl-bv-ql-rhc-atcd
 #| tbl-cap: !expr ".title_descr$rhc[2]"
-
-tbl_bv_rhc_atcd
+tbl_bv_ql$atcd$atcd_rhc
 ```
 
 ```{r}
-#| label: tbl-bv-rhc-pv
+#| label: tbl-bv-ql-rhc-pv
 #| tbl-cap: !expr ".title_descr$rhc[3]"
-
-tbl_bv_rhc_pv
+tbl_bv_ql$pv$pv_rhc
 ```
 
 ```{r}
-#| label: tbl-bv-rhc-bio
+#| label: tbl-bv-ql-rhc-bio
 #| tbl-cap: !expr ".title_descr$rhc[4]"
-
-tbl_bv_rhc_bio
+tbl_bv_ql$bio$bio_rhc
 ```
 
 `r add_script("tbl_bv_qt.R", suffix = "(2)")`
 
 ```{r}
-#| label: tbl-bv-rhc-bin
+#| label: tbl-bv-qt-bin-rhc
 #| tbl-cap: !expr ".title_descr$rhc[5]"
-
-tbl_bv_rhc_bin
+tbl_bv_qt$bin$rhc
 ```
 
 ```{r}
-#| label: tbl-bv-rhc-qt
+#| label: tbl-bv-qt-qt-rhc
 #| tbl-cap: !expr ".title_descr$rhc[6]"
-
-tbl_bv_rhc_qt
+tbl_bv_qt$qt$rhc
 ```
 
 # Score de propension
@@ -564,7 +550,7 @@ Celles-ci ont toutes été traitées par **imputations multiples** en suivant la
 
 ```{r}
 sp_vars_view <-
-opts$view$data |>
+  opts$view$data |>
   select(variable, label) |>
   filter(variable %in% sp_vars) |>
   rownames_to_column()
@@ -574,42 +560,43 @@ Un modèle régression logistique a été réalisé afin de prédire la propensi
 
 ```{r}
 sp_vars_view |>
-  gt_qmd(font_size = 13,
-         data_row.padding = 4)
+  gt_qmd(font_size = 13, data_row.padding = 4)
 ```
 
 La distribution du score de propension dans l'ensemble de la population était la suivante :
 
 ```{r}
 df_sp["sp"] |>
-  tbl_wide_summary(statistic = opts$qt_stat_wide,
-                   digits = ~ 2) |>
+  tbl_wide_summary(statistic = opts$qt_stat_wide, digits = ~2) |>
   modify_header(stat_6 ~ glue("**{names(opts$qt_stat$mean)}**")) |>
   gt_qmd()
 ```
 
 ```{r}
 .title_sp_dist <-
-map(c(global = "chez",
-      match = "après appariement entre"),
-      ~ glue("Distribution du score de propension {.} les sujets
-             {str_color('sans', .pal[1])} et {str_color('avec', .pal[2])}
-             cathétérisme droit."))
+  map(
+    c(global = "chez", match = "après appariement entre"),
+    ~ glue(
+      "Distribution du score de propension {.} les sujets
+      {str_color('sans', .pal[1])} et {str_color('avec', .pal[2])} cathétérisme droit."
+    )
+  )
 
 .sp_dist_match <-
-lst(cal = df_match_model$caliper,
+  lst(
+    cal = df_match_model$caliper,
     n_pair = sum(df_match$rhc == 0),
     total_pair = sum(df_setup$rhc == 1),
-    p_match = percent(n_pair / total_pair, accuracy = 0.1))
+    p_match = percent(n_pair / total_pair, accuracy = 0.1)
+  )
 
 .title_sp_dist_match <-
-str_fig(title = .title_sp_dist$match,
-        note =
-          "Appariement 1:1 selon la méthode des plus proches voisins.
-          Caliper fixé à {.sp_dist_match$cal} (brut). {.sp_dist_match$n_pair}
-          appariements réalisés sur {.sp_dist_match$total_pair} possibles,
-          soit avec une correspondance de {.sp_dist_match$p_match}.",
-        qmd = TRUE)
+  str_fig(
+    title = .title_sp_dist$match,
+    note = "Appariement 1:1 selon la méthode des plus proches voisins.
+      Caliper fixé à {.sp_dist_match$cal} (brut). {.sp_dist_match$n_pair} appariements réalisés sur {.sp_dist_match$total_pair} possibles, soit avec une correspondance de {.sp_dist_match$p_match}.",
+    qmd = TRUE
+  )
 ```
 
 La distribution du score de propension dans chaque groupe était la suivante
@@ -622,8 +609,7 @@ La distribution du score de propension dans chaque groupe était la suivante
 #| fig-cap: !expr '.title_sp_dist$global'
 #| lightbox:
 #|   group: fig-sp-dist
-
-include_graphics("output/fig_dist.global.png")
+include_graphics("output/fig_dist_global.png")
 ```
 
 Dans une situation où le score de propension prédirait parfaitement l'allocation du cathétérisme, il n'y aurait aucune observation située au-dessus de la ligne horizontale chez les sujets sans et aucune située en dessous chez les sujets avec.
@@ -643,7 +629,6 @@ Les performances supposées du score de propension ont pu être évaluées à l'
 #| label: fig-sp-roc
 #| out-width: 50%
 #| fig-cap: Courbe ROC du score de propension pour la classification du cathétérisme droit.
-
 include_graphics("output/fig_roc.png")
 ```
 
@@ -653,7 +638,7 @@ Les **paramètres intrinsèques** ont pu être calculés :
 
 ```{r}
 .perf <-
-df_sp |>
+  df_sp |>
   conf_mat(.pred_class, truth = rhc) |>
   tidy()
 
@@ -681,8 +666,7 @@ Les sujets ont été appariés sur le score de propension selon un ratio **1:1**
 #| fig-cap: !expr '.title_sp_dist_match'
 #| lightbox:
 #|   group: fig-sp-dist
-
-include_graphics("output/fig_dist.match.png")
+include_graphics("output/fig_dist_match.png")
 ```
 
 L'appariement semblait visuellement satisfaisant.
@@ -702,18 +686,17 @@ L'équilibrage des variables entre les groupes pouvait être évalué par le cal
 #| label: fig-sp-smd
 #| out-width: 60%
 #| fig-cap: !expr '.title_smd'
-
 .title_smd <-
-str_fig(title =
-          "Différences moyennes standardisées (SMD) pour chaque variable
+  str_fig(
+    title = "Différences moyennes standardisées (SMD) pour chaque variable
           constitutive du score de propension, {str_color('avant', .pal[1])}
           et {str_color('après', .pal[2])} appariement.",
-        note =
-          "{nrow(df_match) / 2} appariements sur le score propension
+    note = "{nrow(df_match) / 2} appariements sur le score propension
           selon un caliper fixé à {.sp_dist_match$cal} (brut). Les SMD
           étaient présentées en valeurs absolues et classées par valeurs
           globales décroissantes.",
-        qmd = TRUE)
+    qmd = TRUE
+  )
 
 include_graphics("output/fig_smd.png")
 ```
@@ -732,23 +715,20 @@ Le tableau suivant présente les odds ratios fournis par un modèle de régressi
 
 ```{r}
 compar_df |>
-  imap(~ workflow() |>
-         add_model(.sp_model) |>
-         add_formula(factor(ev_death_30) ~ rhc) |>
-         fit(data = .x) |>
-         tidy(exponentiate = TRUE,
-              conf.int = TRUE) |>
-         merge_estim_ci() |>
-         filter(str_starts(term, "rhc")) |>
-         mutate(term = .y,
-                p.value = style_pvalue(p.value)) |>
-         select(" " = term,
-                "OR {opts$ci$label}" := estimate_ci,
-                p.value)) |>
+  imap(
+    ~ workflow() |>
+      add_model(.sp_model) |>
+      add_formula(factor(ev_death_30) ~ rhc) |>
+      fit(data = .x) |>
+      tidy(exponentiate = TRUE, conf.int = TRUE) |>
+      merge_estim_ci() |>
+      filter(str_starts(term, "rhc")) |>
+      mutate(term = .y, p.value = style_pvalue(p.value)) |>
+      select(" " = term, "OR {opts$ci$label}" := estimate_ci, p.value)
+  ) |>
   list_c() |>
   gt_qmd() |>
-  tab_style(style = cell_text(align = "right"),
-            locations = cells_body())
+  tab_style(style = cell_text(align = "right"), locations = cells_body())
 ```
 
 \
@@ -777,17 +757,20 @@ Une courbe de survie a été produite selon la méthode de Kaplan-Meier, ainsi q
 
 ```{r}
 .title_surv <-
-map(c(non_ajusté = "sans",
-      ajusté = "après"),
-    ~ str_fig(title =
-                  glue("Comparaison du risque de mortalité à 30 jours
+  map(
+    c(non_ajusté = "sans", ajusté = "après"),
+    ~ str_fig(
+      title = glue(
+        "Comparaison du risque de mortalité à 30 jours
                        entre les sujets {str_color('sans', .pal[1])} et
                        {str_color('avec', .pal[2])} cathétérisme droit,
-                       {.} ajustement."),
-              note =
-                "Les courbes étaient construites suivant la méthode de Kaplan-Meier.
+                       {.} ajustement."
+      ),
+      note = "Les courbes étaient construites suivant la méthode de Kaplan-Meier.
                 Aucune censure n'était observée avant la date de point.",
-              qmd = TRUE))
+      qmd = TRUE
+    )
+  )
 ```
 
 # Sans ajustement
@@ -797,7 +780,6 @@ map(c(non_ajusté = "sans",
 #| fig-cap: !expr '.title_surv$non_ajusté'
 #| lightbox:
 #|   group: fig-surv
-
 include_graphics("output/fig_surv_non_ajusté.png")
 ```
 
@@ -808,7 +790,6 @@ include_graphics("output/fig_surv_non_ajusté.png")
 #| fig-cap: !expr '.title_surv$ajusté'
 #| lightbox:
 #|   group: fig-surv
-
 include_graphics("output/fig_surv_ajusté.png")
 ```
 

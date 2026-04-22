@@ -1,5 +1,4 @@
-fig_roc <-
-df_sp |>
+fig_roc <- df_sp |>
   roc_curve(.pred_0, truth = rhc) |>
   ggplot() +
   aes(x = 1 - specificity, y = sensitivity) +
@@ -13,11 +12,10 @@ df_sp |>
     family = opts$font
   ) +
   annotation_custom(
-    grob =
-      df_sp |>
-        conf_mat(.pred_class, truth = rhc) |>
-        autoplot(type = "heatmap") |>
-        ggplotGrob(),
+    grob = df_sp |>
+      conf_mat(.pred_class, truth = rhc) |>
+      autoplot(type = "heatmap") |>
+      ggplotGrob(),
     xmin = 0.47,
     xmax = 1.05,
     ymin = -0.05,
@@ -28,9 +26,9 @@ df_sp |>
     geom_hline(yintercept = 1, !!!opts$line),
     geom_vline(xintercept = 0, !!!opts$line)
   ) |>
-  inject() +
+    inject() +
   coord_equal() +
   labs(x = "Non-spécificité", y = "Sensibilité") +
   theme_bar(grid = FALSE)
 
-easy_out(fig_roc, size = c(4, 4))
+easy_out(fig_roc, height = 4, width = 4)

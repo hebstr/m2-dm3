@@ -1,5 +1,5 @@
-test <- as_mapper(~
-  ggplot(.x) +
+test <- as_mapper(
+  ~ ggplot(.x) +
     aes(y = sp) +
     geom_mirror_histogram(
       mapping = aes(fill = rhc),
@@ -36,6 +36,9 @@ test <- as_mapper(~
     theme_bar(panel.background = element_rect(fill = "grey95"))
 )
 
-list(global = df_sp, match = df_match) |>
-  map(test) |>
-  easy_out_map(filename = glue("fig_dist"), size = c(3.5, 6))
+map(list(global = df_sp, match = df_match), test) |>
+  easy_out_map(
+    filename = "fig_dist",
+    height = 3.5,
+    width = 6
+  )
