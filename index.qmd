@@ -4,8 +4,10 @@ title: "DM3 : Épidémiologie"
 subtitle: "M2MSR 2023-2024"
 
 author:
-  name: "**Groupe 11** - Julien ELICES-DIEZ"
+  name: "Groupe 11 - Julien ELICES-DIEZ"
   email: "ju.diez@protonmail.com"
+
+lang: fr
 
 date: last-modified
 
@@ -13,10 +15,10 @@ filters:
   - add-code-files
 
 format:
-  hebstr-template-html:
+  hebstr-html:
     code-tools:
       source: https://github.com/hebstr/m2-dm3
-  hebstr-template-typst: default
+  # hebstr-typst: default
 ---
 
 ```{r}
@@ -26,12 +28,12 @@ library(gt)
 
 options(easy_out.quiet = TRUE)
 
-conflicted::conflict_prefer("filter", "dplyr")
+# conflicted::conflict_prefer("filter", "dplyr")
 
-.gt_format <- hebstr::gt_format
-gt_format <- \(x, ..., font_size = 16, row_padding = 10) {
-  .gt_format(x, font_size = font_size, row_padding = row_padding, ...)
-}
+# .gt_format <- hebstr::gt_format
+# gt_format <- \(x, ..., font_size = 16, row_padding = 10) {
+#   .gt_format(x, font_size = font_size, row_padding = row_padding, ...)
+# }
 
 source(here::here("scripts", "_setup.R"))
 

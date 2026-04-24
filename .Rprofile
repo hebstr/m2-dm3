@@ -1,4 +1,5 @@
-source("renv/activate.R")
+source("rv/scripts/rvr.R")
+source("rv/scripts/activate.R")
 source("~/.Rprofile")
 
 library(tidyverse) |> suppressPackageStartupMessages()
