@@ -19,3 +19,5 @@ library(hebstr)
 update_geom_defaults("text", list(family = "Luciole"))
 
 lang_fr()
+
+conflicted::conflict_prefer("filter", "dplyr")

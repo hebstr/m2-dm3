@@ -1,14 +1,10 @@
 ---
 title: "DM3 : Épidémiologie"
-
 subtitle: "M2MSR 2023-2024"
-
 author:
   name: "Groupe 11 - Julien ELICES-DIEZ"
   email: "ju.diez@protonmail.com"
-
 lang: fr
-
 date: last-modified
 
 filters:
@@ -27,8 +23,6 @@ library(knitr)
 library(gt)
 
 options(easy_out.quiet = TRUE)
-
-# conflicted::conflict_prefer("filter", "dplyr")
 
 # .gt_format <- hebstr::gt_format
 # gt_format <- \(x, ..., font_size = 16, row_padding = 10) {
@@ -131,7 +125,10 @@ Le nombre d'occurrence de la variable binaire `death`, correspondant au statut "
 ```{r}
 #| echo: true
 #| code-fold: false
-identical(sum(df_base$death == "Yes"), sum(!is.na(df_base$dthdte)))
+identical(
+  sum(df_base$death == "Yes"),
+  sum(!is.na(df_base$dthdte))
+)
 ```
 
 Ainsi il était possible d'affirmer que les dates de décès manquantes correspondaient à la **non-survenue du décès**.
@@ -156,7 +153,12 @@ Le calcul *de novo* d'une variable **"mortalité à 180 jours"** rapportait des 
 #| echo: true
 #| code-fold: false
 df_base |>
-  count(death_180 = case_when(as.numeric(dthdte - sadmdte) <= 180 ~ "Yes", .default = "No"))
+  count(
+    death_180 = case_when(
+      as.numeric(dthdte - sadmdte) <= 180 ~ "Yes",
+      .default = "No"
+    )
+  )
 ```
 
 Par conséquent la variable `death` correspondait bien, comme son nom l'indique, à la **mortalité toutes périodes confondues**, [et non à la mortalité à 180 jours comme l'indiquait son libellé]{.cb2}.
