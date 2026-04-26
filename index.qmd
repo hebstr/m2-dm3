@@ -6,15 +6,10 @@ author:
   email: "ju.diez@protonmail.com"
 lang: fr
 date: last-modified
-
-filters:
-  - add-code-files
-
 format:
   hebstr-html:
     code-tools:
       source: https://github.com/hebstr/m2-dm3
-  # hebstr-typst: default
 ---
 
 ```{r}
@@ -34,8 +29,6 @@ source(here::here("scripts", "_setup.R"))
 auto_exec()
 
 .pal <- opts$palette
-
-add_script <- \(x, ...) add_code_file(here::here("scripts", x), ...)
 ```
 
 # Énoncé {.unnumbered .unlisted}
@@ -67,8 +60,9 @@ Aucun large language model n'est utilisé pour la rédaction du code ou du texte
 # Le contenu de ce devoir n'est pas corrigé
 :::
 
-`r add_code_file(".Rprofile", lang = "r")`
-`r add_script("_setup.R")`
+{{< script .Rprofile >}}
+
+{{< script scripts/_setup.R >}}
 
 # Data management
 
@@ -377,7 +371,7 @@ Les variables catégorielles ont pu être regroupées en 4 catégories :
 - Paramètres vitaux (`pv_*`)
 - Paramètres biologiques (`bio_*`)
 
-`r add_script("fig_uv.R")`
+{{< script scripts/fig_uv.R >}}
 
 ```{r}
 #| label: fig-uv-demo
@@ -421,7 +415,7 @@ include_graphics("output/fig_uv_pv.png")
 include_graphics("output/fig_uv_bio.png")
 ```
 
-`r add_script("tbl_uv.R")`
+{{< script scripts/tbl_uv.R >}}
 
 ```{r}
 #| label: tbl-uv-bin
@@ -450,7 +444,7 @@ L'analyse précédente a été reproduite après croisement sur 2 variables :
 
 ## Mortalité à 30 jours
 
-`r add_script("tbl_bv_ql.R", suffix = "(1)")`
+{{< script scripts/tbl_bv_ql.R suffix=(1) >}}
 
 ```{r}
 #| label: tbl-bv-ql-demo-ev-death-30
@@ -476,7 +470,7 @@ tbl_bv_ql$pv$pv_ev_death_30
 tbl_bv_ql$bio$bio_ev_death_30
 ```
 
-`r add_script("tbl_bv_qt.R", suffix = "(1)")`
+{{< script scripts/tbl_bv_qt.R suffix=(1) >}}
 
 ```{r}
 #| label: tbl-bv-qt-bin-ev-death-30
@@ -492,7 +486,7 @@ tbl_bv_qt$qt$ev_death_30
 
 ## Cathétérisme droit
 
-`r add_script("tbl_bv_ql.R", suffix = "(2)")`
+{{< script scripts/tbl_bv_ql.R suffix=(2) >}}
 
 ```{r}
 #| label: tbl-bv-ql-rhc-demo
@@ -518,7 +512,7 @@ tbl_bv_ql$pv$pv_rhc
 tbl_bv_ql$bio$bio_rhc
 ```
 
-`r add_script("tbl_bv_qt.R", suffix = "(2)")`
+{{< script scripts/tbl_bv_qt.R suffix=(2) >}}
 
 ```{r}
 #| label: tbl-bv-qt-bin-rhc
@@ -548,7 +542,7 @@ gt_qmd(.miss_data)
 
 Celles-ci ont toutes été traitées par **imputations multiples** en suivant la méthode des **forêts aléatoires** (10 imputations, 5 itérations).
 
-`r add_script("_imp.R")`
+{{< script scripts/_imp.R >}}
 
 ## Description du modèle
 
@@ -605,7 +599,7 @@ df_sp["sp"] |>
 
 La distribution du score de propension dans chaque groupe était la suivante
 
-`r add_script("fig_dist.R", suffix = "(1)")`
+{{< script scripts/fig_dist.R suffix=(1) >}}
 
 ```{r}
 #| label: fig-sp-dist-global
@@ -627,7 +621,7 @@ Parmi les sujets avec cathétérisme, le modèle ne semblait pas capable de dét
 
 Les performances supposées du score de propension ont pu être évaluées à l'aide d'une **courbe ROC**.
 
-`r add_script("fig_roc.R")`
+{{< script scripts/fig_roc.R >}}
 
 ```{r}
 #| label: fig-sp-roc
@@ -662,7 +656,7 @@ se <- label_p()(vp / total_p)
 
 Les sujets ont été appariés sur le score de propension selon un ratio **1:1**, par la méthode des plus proches voisins. Un caliper fixé à **`r .sp_dist_match$cal`** (`r .sp_dist_match$cal/0.2` * 0.2) semblait être un bon compromis entre qualité de l'appariement et préservation de la puissance.
 
-`r add_script("fig_dist.R", suffix = "(2)")`
+{{< script scripts/fig_dist.R suffix=(2) >}}
 
 ```{r}
 #| label: fig-sp-dist-match
@@ -684,7 +678,7 @@ p_match <- label_p()(n_pair * 2 / n_total)
 Le jeu de données apparié était ainsi constitué de (`r n_pair` x 2) / `r n_total` = **`r p_match`** du jeu de données initial.
 L'équilibrage des variables entre les groupes pouvait être évalué par le calcul des **différences moyennes standardisées**.
 
-`r add_script("fig_smd.R")`
+{{< script scripts/fig_smd.R >}}
 
 ```{r}
 #| label: fig-sp-smd
@@ -755,7 +749,7 @@ Cette tendance pouvait être confirmée à l'aide d'une **analyse time-to-event*
 
 Une courbe de survie a été produite selon la méthode de Kaplan-Meier, ainsi qu'un modèle de Cox dans le but de quantifier le **risque instantané de décès** entre les groupes avec et sans cathétérisme.
 
-`r add_script("fig_surv.R")`
+{{< script scripts/fig_surv.R >}}
 
 ::: panel-tabset
 
@@ -811,8 +805,13 @@ Une différence de risque entre les groupes **plus faible après ajustement** su
 La nature **observationnelle** de l'étude, le **choix des variables** incluses dans le calcul du score de propension, la **perte de puissance** induite par l'appariement, étaient des facteurs limitant l'interprétabilité des résultats.
 Un **essai randomisé** permettrait de porter de meilleures conclusions quant à l'imputabilité du cathétérisme droit sur la mortalité à 30 jours.
 
+\
+
+***
+
 # Session {.unnumbered .unlisted}
 
 ```{r}
+#| code-fold: true
 devtools::session_info(pkgs = "attached")
 ```

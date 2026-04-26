@@ -1,8 +1,10 @@
 title: hebstr
 author: hebstr
 version: 0.10.0
-quarto-required: ">=1.8.0"
+quarto-required: ">=1.9.36"
 contributes:
+  shortcodes:
+    - filters/add-code-files.lua
   formats:
     common:
       number-sections: true
@@ -32,17 +34,31 @@ contributes:
       toc-expand: true
       code-link: false
       code-fold: true
-      code-copy: hover
+      code-copy: always
       html-table-processing: none
       html-math-method: plain
-      theme: theme.scss
+      theme:
+        light: theme.scss
+        dark: theme-dark.scss
       css: fonts/fonts.css
+      include-after-body:
+        - filters/toggle-position.html
       lightbox: true
       grid:
         sidebar-width: 0px
         body-width: 1100px
         margin-width: 600px
         gutter-width: 3rem
+      filters:
+        - at: pre-quarto
+          path: _extensions/mcanouil/code-window/main.lua
+        - at: post-quarto
+          path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
+      extensions:
+        code-window:
+          enabled: true
+          auto-filename: true
+          style: default
     typst:
       mainfont: "Luciole"
       font-paths: fonts
@@ -52,6 +68,11 @@ contributes:
         y: 1.5cm
       keep-typ: false
       include-in-header: template.typ
+      filters:
+        - at: pre-quarto
+          path: _extensions/mcanouil/code-window/main.lua
+        - at: post-quarto
+          path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
     docx:
-      reference-doc: chazard.dotx
+      reference-doc: template.dotx
       number-sections: false
