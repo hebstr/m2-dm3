@@ -31,6 +31,10 @@ contributes:
       page-layout: full
       embed-resources: true
       date: last-modified
+      mainfont: "Luciole"
+      monofont: "Fira Code"
+      fontsize: 1.2rem
+      linestretch: 1.75
       toc-expand: true
       anchor-sections: false
       code-link: false

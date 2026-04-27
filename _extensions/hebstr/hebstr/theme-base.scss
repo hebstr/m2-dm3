@@ -1,6 +1,5 @@
 /*-- scss:defaults --*/
 
-$font-size-root: 1.2rem !default;
 $font-family-sans-serif: "Luciole", system-ui, sans-serif !default;
 $font-family-monospace: "Fira Code", ui-monospace, monospace !default;
 $toc-font-size: 0.825rem !default;
@@ -56,10 +55,6 @@ html {
 
 body {
   background-color: var(--primary-surface);
-}
-
-p {
-  line-height: 1.75rem;
 }
 
 .cb1, .cb2, .nb {
