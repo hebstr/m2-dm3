@@ -812,6 +812,6 @@ Un **essai randomisé** permettrait de porter de meilleures conclusions quant à
 # Session {.unnumbered .unlisted}
 
 ```{r}
-#| code-fold: true
+#| echo: true
 devtools::session_info(pkgs = "attached")
 ```
