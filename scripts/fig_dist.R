@@ -18,7 +18,7 @@ test <- as_mapper(
       ) |>
         arrange(desc(rhc)),
       mapping = aes(
-        label = glue("n={n}\nmédiane={median}"),
+        label = str_glue("n={n}\nmédiane={median}"),
         y = median
       ),
       x = c(50, -50),

@@ -1,12 +1,11 @@
 source("rv/scripts/rvr.R")
 source("rv/scripts/activate.R")
-source("~/.Rprofile")
 
-library(tidyverse) |> suppressPackageStartupMessages()
-library(tidymodels) |> suppressPackageStartupMessages()
-library(rlang, warn.conflicts = FALSE)
-library(mice, warn.conflicts = FALSE)
-library(glue)
+library(conflicted)
+library(tidyverse)
+library(tidymodels)
+library(rlang)
+library(mice)
 library(labelled)
 library(gtsummary)
 library(MatchIt)
@@ -16,8 +15,9 @@ library(ggsurvfit)
 library(patchwork)
 library(hebstr)
 
+print(conflict_scout())
+conflicts_prefer(dplyr::filter)
+
 update_geom_defaults("text", list(family = "Luciole"))
 
 lang_fr()
-
-conflicted::conflicts_prefer(dplyr::filter, .quiet = FALSE)

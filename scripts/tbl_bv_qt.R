@@ -42,7 +42,7 @@ iwalk(
   tbl_bv_qt,
   \(tbls, type) {
     easy_out_map(
-      x = set_names(tbls, ~ glue("{type}_{.}")),
+      x = set_names(tbls, ~ str_glue("{type}_{.}")),
       filename = "tbl_bv_qt",
       width = tbl_bv_qt_params[[type]]
     )

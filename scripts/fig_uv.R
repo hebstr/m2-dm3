@@ -17,7 +17,7 @@ fig_uv <- \(type) {
 
   easy_out(
     x = fig,
-    filename = glue("fig_uv_{type}"),
+    filename = str_glue("fig_uv_{type}"),
     height = .size[[type]][1],
     width = .size[[type]][2]
   )

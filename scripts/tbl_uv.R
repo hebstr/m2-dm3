@@ -7,8 +7,8 @@ tbl_uv_qt <- df_setup |>
     digits = list(~1, proba_surv ~ 2)
   ) |>
   modify_header(
-    label ~ glue("**{opts$labs$header}**"),
-    stat_6 ~ glue("**{names(opts$qt_stat$mean)}**")
+    label ~ str_glue("**{opts$labs$header}**"),
+    stat_6 ~ str_glue("**{names(opts$qt_stat$mean)}**")
   ) |>
   gt_format()
 

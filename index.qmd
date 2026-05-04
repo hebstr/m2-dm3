@@ -345,7 +345,7 @@ opts$view$output
     bin = "variables binaires",
     qt = "variables continues"
   ),
-  ~ glue("Caractéristiques des {.}")
+  ~ str_glue("Caractéristiques des {.}")
 )
 
 .title_descr <- map(
@@ -354,7 +354,7 @@ opts$view$output
     death = " selon la mortalité à 30 jours.",
     rhc = " selon la pose de cathétérisme droit."
   ),
-  ~ glue("{.title_descr_base}{.}")
+  ~ str_glue("{.title_descr_base}{.}")
 )
 ```
 
@@ -563,14 +563,14 @@ La distribution du score de propension dans l'ensemble de la population était l
 ```{r}
 df_sp["sp"] |>
   tbl_wide_summary(statistic = opts$qt_stat_wide, digits = ~2) |>
-  modify_header(stat_6 ~ glue("**{names(opts$qt_stat$mean)}**")) |>
+  modify_header(stat_6 ~ str_glue("**{names(opts$qt_stat$mean)}**")) |>
   gt_qmd()
 ```
 
 ```{r}
 .title_sp_dist <- map(
   c(global = "chez", match = "après appariement entre"),
-  ~ glue(
+  ~ str_glue(
     "Distribution du score de propension {.} les sujets
       {str_color('sans', .pal[1])} et {str_color('avec', .pal[2])} cathétérisme droit."
   )

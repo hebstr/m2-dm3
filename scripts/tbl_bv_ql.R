@@ -15,7 +15,7 @@ tbl_bv_ql_fun <- \(type) {
         gtsum_format() |>
         gt_format()
     ) |>
-    set_names(~ glue("{type}_{.}"))
+    set_names(~ str_glue("{type}_{.}"))
 
   clear_vars()
 

@@ -5,7 +5,7 @@ fig_roc <- df_sp |>
   geom_line(alpha = 0.7) +
   geom_text(
     data = df_sp |> roc_auc(.pred_0, truth = rhc),
-    mapping = aes(label = glue("AUC={round(.estimate, 2)}")),
+    mapping = aes(label = str_glue("AUC={round(.estimate, 2)}")),
     x = 0.2,
     y = 0.85,
     size = 4,

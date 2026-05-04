@@ -56,7 +56,7 @@ fig_surv <- \(x, y) {
     geom_text(
       data = .surv$model$cox$tidy,
       mapping = aes(
-        label = glue(
+        label = str_glue(
           "{str} {opts$ci$label}{opts$sep$int}{estimate_ci}
           Log rank {p.value}"
         ),
