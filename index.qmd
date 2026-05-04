@@ -168,8 +168,7 @@ Hormis un formatage de base de la plupart des variables (i.e. renommage, factori
 Les modalités des variables catégorielles `cat1` et `cat2` étaient les suivantes :
 
 ```{r}
-.val_cat <-
-  exprs(cat1, cat2) |>
+.val_cat <- exprs(cat1, cat2) |>
   map(
     ~ df_base |>
       count(!!., sort = TRUE) |>
@@ -279,12 +278,11 @@ opts$view$data |>
 Certaines variables ont été exclues du jeu de données pour trois raisons.
 
 ```{r}
-exclus_list <-
-  list(
-    trop_miss = c("adld3p", "urin1"),
-    pas_interp = c("lstctdte", "alb1"),
-    pas_util = c("ptid", "cat1", "cat2", "sadmdte", "dschdte", "dthdte", "death")
-  ) |>
+exclus_list <- list(
+  trop_miss = c("adld3p", "urin1"),
+  pas_interp = c("lstctdte", "alb1"),
+  pas_util = c("ptid", "cat1", "cat2", "sadmdte", "dschdte", "dthdte", "death")
+) |>
   map(
     ~ df_qmd |>
       relocate(names(.labels_qmd)) |>
@@ -338,28 +336,26 @@ opts$view$output
 ```
 
 ```{r}
-.title_descr_base <-
-  map(
-    c(
-      demo = "variables sociodémographiques",
-      atcd = "antécédents et comorbidités",
-      pv = "paramètres vitaux",
-      bio = "paramètres biologiques",
-      bin = "variables binaires",
-      qt = "variables continues"
-    ),
-    ~ glue("Caractéristiques des {.}")
-  )
+.title_descr_base <- map(
+  c(
+    demo = "variables sociodémographiques",
+    atcd = "antécédents et comorbidités",
+    pv = "paramètres vitaux",
+    bio = "paramètres biologiques",
+    bin = "variables binaires",
+    qt = "variables continues"
+  ),
+  ~ glue("Caractéristiques des {.}")
+)
 
-.title_descr <-
-  map(
-    c(
-      uv = ".",
-      death = " selon la mortalité à 30 jours.",
-      rhc = " selon la pose de cathétérisme droit."
-    ),
-    ~ glue("{.title_descr_base}{.}")
-  )
+.title_descr <- map(
+  c(
+    uv = ".",
+    death = " selon la mortalité à 30 jours.",
+    rhc = " selon la pose de cathétérisme droit."
+  ),
+  ~ glue("{.title_descr_base}{.}")
+)
 ```
 
 # Analyse descriptive univariée
@@ -378,13 +374,15 @@ Les variables catégorielles ont pu être regroupées en 4 catégories :
 #| out-width: 90%
 #| fig-align: center
 #| fig-cap: !expr '.title_uv_demo'
-.acro <-
-  opts$acro |>
+.acro <- opts$acro |>
   with(mget(str_subset(names(opts$acro), str_u(levels(df_setup$insur))))) |>
   acro_str(collapse = opts$sep$ext)
 
-.title_uv_demo <-
-  str_fig(title = .title_descr$uv[1], acro = .acro, qmd = TRUE)
+.title_uv_demo <- str_fig(
+  title = .title_descr$uv[1],
+  acro = .acro,
+  qmd = TRUE
+)
 
 include_graphics("output/fig_uv_demo.png")
 ```
@@ -547,8 +545,7 @@ Celles-ci ont toutes été traitées par **imputations multiples** en suivant la
 ## Description du modèle
 
 ```{r}
-sp_vars_view <-
-  opts$view$data |>
+sp_vars_view <- opts$view$data |>
   select(variable, label) |>
   filter(variable %in% sp_vars) |>
   rownames_to_column()
@@ -571,30 +568,27 @@ df_sp["sp"] |>
 ```
 
 ```{r}
-.title_sp_dist <-
-  map(
-    c(global = "chez", match = "après appariement entre"),
-    ~ glue(
-      "Distribution du score de propension {.} les sujets
+.title_sp_dist <- map(
+  c(global = "chez", match = "après appariement entre"),
+  ~ glue(
+    "Distribution du score de propension {.} les sujets
       {str_color('sans', .pal[1])} et {str_color('avec', .pal[2])} cathétérisme droit."
-    )
   )
+)
 
-.sp_dist_match <-
-  lst(
-    cal = df_match_model$caliper,
-    n_pair = sum(df_match$rhc == 0),
-    total_pair = sum(df_setup$rhc == 1),
-    p_match = percent(n_pair / total_pair, accuracy = 0.1)
-  )
+.sp_dist_match <- lst(
+  cal = df_match_model$caliper,
+  n_pair = sum(df_match$rhc == 0),
+  total_pair = sum(df_setup$rhc == 1),
+  p_match = percent(n_pair / total_pair, accuracy = 0.1)
+)
 
-.title_sp_dist_match <-
-  str_fig(
-    title = .title_sp_dist$match,
-    note = "Appariement 1:1 selon la méthode des plus proches voisins.
-      Caliper fixé à {.sp_dist_match$cal} (brut). {.sp_dist_match$n_pair} appariements réalisés sur {.sp_dist_match$total_pair} possibles, soit avec une correspondance de {.sp_dist_match$p_match}.",
-    qmd = TRUE
-  )
+.title_sp_dist_match <- str_fig(
+  title = .title_sp_dist$match,
+  note = "Appariement 1:1 selon la méthode des plus proches voisins.
+    Caliper fixé à {.sp_dist_match$cal} (brut). {.sp_dist_match$n_pair} appariements réalisés sur {.sp_dist_match$total_pair} possibles, soit avec une correspondance de {.sp_dist_match$p_match}.",
+  qmd = TRUE
+)
 ```
 
 La distribution du score de propension dans chaque groupe était la suivante
@@ -635,8 +629,7 @@ Une telle aire sous la courbe témoignait d'une capacité discriminante **faible
 Les **paramètres intrinsèques** ont pu être calculés :
 
 ```{r}
-.perf <-
-  df_sp |>
+.perf <- df_sp |>
   conf_mat(.pred_class, truth = rhc) |>
   tidy()
 
@@ -684,17 +677,16 @@ L'équilibrage des variables entre les groupes pouvait être évalué par le cal
 #| label: fig-sp-smd
 #| out-width: 60%
 #| fig-cap: !expr '.title_smd'
-.title_smd <-
-  str_fig(
-    title = "Différences moyennes standardisées (SMD) pour chaque variable
-          constitutive du score de propension, {str_color('avant', .pal[1])}
-          et {str_color('après', .pal[2])} appariement.",
-    note = "{nrow(df_match) / 2} appariements sur le score propension
-          selon un caliper fixé à {.sp_dist_match$cal} (brut). Les SMD
-          étaient présentées en valeurs absolues et classées par valeurs
-          globales décroissantes.",
-    qmd = TRUE
-  )
+.title_smd <- str_fig(
+  title = "Différences moyennes standardisées (SMD) pour chaque variable
+    constitutive du score de propension, {str_color('avant', .pal[1])}
+    et {str_color('après', .pal[2])} appariement.",
+  note = "{nrow(df_match) / 2} appariements sur le score propension
+    selon un caliper fixé à {.sp_dist_match$cal} (brut). Les SMD
+    étaient présentées en valeurs absolues et classées par valeurs
+    globales décroissantes.",
+  qmd = TRUE
+)
 
 include_graphics("output/fig_smd.png")
 ```
@@ -754,21 +746,19 @@ Une courbe de survie a été produite selon la méthode de Kaplan-Meier, ainsi q
 ::: panel-tabset
 
 ```{r}
-.title_surv <-
-  map(
-    c(non_ajusté = "sans", ajusté = "après"),
-    ~ str_fig(
-      title = glue(
-        "Comparaison du risque de mortalité à 30 jours
-                       entre les sujets {str_color('sans', .pal[1])} et
-                       {str_color('avec', .pal[2])} cathétérisme droit,
-                       {.} ajustement."
-      ),
-      note = "Les courbes étaient construites suivant la méthode de Kaplan-Meier.
-                Aucune censure n'était observée avant la date de point.",
-      qmd = TRUE
-    )
+.title_surv <- map(
+  c(non_ajusté = "sans", ajusté = "après"),
+  ~ str_fig(
+    title = str_glue(
+      "Comparaison du risque de mortalité à 30 jours entre les sujets
+      {str_color('sans', .pal[1])} et {str_color('avec', .pal[2])}
+      cathétérisme droit, {.} ajustement."
+    ),
+    note = "Les courbes étaient construites suivant la méthode de Kaplan-Meier.
+      Aucune censure n'était observée avant la date de point.",
+    qmd = TRUE
   )
+)
 ```
 
 # Sans ajustement
@@ -813,5 +803,5 @@ Un **essai randomisé** permettrait de porter de meilleures conclusions quant à
 
 ```{r}
 #| echo: true
-devtools::session_info(pkgs = "attached")
+sessioninfo::session_info(pkgs = "attached")
 ```

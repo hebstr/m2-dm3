@@ -1,6 +1,6 @@
 [project]
 name = "m2_dm3"
-r_version = "4.5"
+r_version = "4.6"
 
 repositories = [
     {alias = "CRAN", url = "https://packagemanager.posit.co/cran/latest"},
@@ -16,6 +16,5 @@ dependencies = [
     "MatchIt",
     "halfmoon",
     "ggsurvfit",
-    "rsvg",
-    "devtools",
+    "sessioninfo",
 ]
