@@ -14,6 +14,7 @@ format:
 
 ```{r}
 #| include: false
+
 library(knitr)
 library(gt)
 
@@ -49,7 +50,8 @@ L'ensemble du code est divisé en 2 types de scripts :
 
 Les paramètres et objets définis dans `_setup.R` sont injectés dans les scripts tableaux et figures, exécutés en aval, afin d'éviter toute duplication de code.
 
-Les tableaux et figures numérotés sont précédés de leur script respectif (replié par défaut). Si plusieurs éléments sont produits par un même script, celui-ci est placé soit uniquement devant le premier élément, soit placé à plusieurs reprises avec une numérotation.
+Les tableaux et figures numérotés sont précédés de leur script respectif (replié par défaut).
+Si plusieurs éléments sont produits par un même script, celui-ci est placé soit uniquement devant le premier élément, soit placé à plusieurs reprises avec une numérotation.
 
 L'ensemble du matériel est accessible depuis un dépôt git en cliquant sur [</> Code]{.nb} en haut à droite de la page.
 
@@ -86,7 +88,9 @@ df_qmd <- df_base |> set_variable_labels(!!!.labels_qmd)
 
 ## Composition initiale
 
-Le jeu de données était constitué de **`r nrow(df_base)` observations** pour **`r ncol(df_base)` variables** (sans prise en compte du numéro de ligne). Il se présentait au format long, soit une ligne par sujet. Il n'y avait pas de doublons.
+Le jeu de données était constitué de **`r nrow(df_base)` observations** pour **`r ncol(df_base)` variables** (sans prise en compte du numéro de ligne).
+Il se présentait au format long, soit une ligne par sujet.
+Il n'y avait pas de doublons.
 
 ### Valeurs aberrantes
 
@@ -119,6 +123,7 @@ Le nombre d'occurrence de la variable binaire `death`, correspondant au statut "
 ```{r}
 #| echo: true
 #| code-fold: false
+
 identical(
   sum(df_base$death == "Yes"),
   sum(!is.na(df_base$dthdte))
@@ -127,17 +132,19 @@ identical(
 
 Ainsi il était possible d'affirmer que les dates de décès manquantes correspondaient à la **non-survenue du décès**.
 
-La raison pour laquelle ADL et diurèse contenaient une telle proportion de valeurs manquantes n'était pas évidente. Celles-ci étaient considérées ***completely at random***.
+La raison pour laquelle ADL et diurèse contenaient une telle proportion de valeurs manquantes n'était pas évidente.
+Celles-ci étaient considérées ***completely at random***.
 
 ::: callout-important
-
 # Remarque sur la variable `death`
 
-Selon la documentation fournie, la variable binaire `death` était renseignée comme étant la **mortalité à 180 jours**. Or le nombre d'occurrences positives de cette variable était égal au nombre total de sujets décédés.
+Selon la documentation fournie, la variable binaire `death` était renseignée comme étant la **mortalité à 180 jours**.
+Or le nombre d'occurrences positives de cette variable était égal au nombre total de sujets décédés.
 
 ```{r}
 #| echo: true
 #| code-fold: false
+
 count(df_base, death)
 ```
 
@@ -146,6 +153,7 @@ Le calcul *de novo* d'une variable **"mortalité à 180 jours"** rapportait des 
 ```{r}
 #| echo: true
 #| code-fold: false
+
 df_base |>
   count(
     death_180 = case_when(
@@ -156,7 +164,6 @@ df_base |>
 ```
 
 Par conséquent la variable `death` correspondait bien, comme son nom l'indique, à la **mortalité toutes périodes confondues**, [et non à la mortalité à 180 jours comme l'indiquait son libellé]{.cb2}.
-
 :::
 
 ## Recodage des variables
@@ -178,6 +185,7 @@ Les modalités des variables catégorielles `cat1` et `cat2` étaient les suivan
 
 ```{r}
 #| layout-ncol: 2
+
 gt_qmd(.val_cat[[1]])
 
 gt_qmd(.val_cat[[2]])
@@ -190,6 +198,7 @@ Chez les sujets ayant au moins une occurrence **"cancer"** en `cat1` ou `cat2`, 
 ```{r}
 #| echo: true
 #| code-fold: false
+
 df_base |>
   filter(if_any(c(cat1, cat2), str_detect, "Cancer")) |>
   count(cancer)
@@ -197,17 +206,18 @@ df_base |>
 
 L'information relative au cancer étant déjà présente dans la variable `cancer`, la décision a été prise de **supprimer** les occurrences "cancer" de `cat1` et `cat2` par une conversion en **valeurs manquantes**.
 
-Quant à des modalités telles que cirrhose ou BPCO, il n'y avait aucune indication concernant leur caractère aigu ou chronique. À défaut nous avons considéré qui s'agissait bien de **décompensations aiguës** et que leur présence au sein de ces variables était donc justifiée.
+Quant à des modalités telles que cirrhose ou BPCO, il n'y avait aucune indication concernant leur caractère aigu ou chronique.
+À défaut nous avons considéré qui s'agissait bien de **décompensations aiguës** et que leur présence au sein de ces variables était donc justifiée.
 
 Aucune distinction n'était faite entre les deux catégories de défaillance multiviscérale "MOSF".
 
 Finalement, l'information apportée par `cat1` et `cat2` a été regroupée en une nouvelle variable catégorielle substitutive nommée **"défaillance d'organe"** (`org_fail`) :
 
-| **modalité** | **condition**                                                |
-|:------------:|:-------------------------------------------------------------|
-| aucune       | aucun diagnostic parmi `cat1` et `cat2`                      |
-| uni          | un seul diagnostic parmi `cat1` et `cat2` hormis MOSF        |
-| multi        | deux diagnostics ou au moins une MOSF parmi `cat1` et `cat2` |
+  | **modalité**   | **condition**                                                  |
+  | :------------: | :------------------------------------------------------------- |
+  |     aucune     | aucun diagnostic parmi `cat1` et `cat2`                        |
+  |      uni       | un seul diagnostic parmi `cat1` et `cat2` hormis MOSF          |
+  |     multi      | deux diagnostics ou au moins une MOSF parmi `cat1` et `cat2`   |
 
 ### Synthèse des diagnostics et comorbidités
 
@@ -218,13 +228,14 @@ Seule la variable `transhx` correspondant au **"transfert interhospitalier >24h"
 
 ### Factorisation du niveau d'études
 
-La variable numérique **"niveau d'études"** représentait le nombre d'années de scolarisation dans le système étasunien. Elle a été factorisée en 3 catégories :
+La variable numérique **"niveau d'études"** représentait le nombre d'années de scolarisation dans le système étasunien.
+Elle a été factorisée en 3 catégories :
 
-| **modalité** | **description**                                              |
-|:------------:|:-------------------------------------------------------------|
-| élémentaire  | <= 8 années (équivalent collège dans le système français)    |
-| secondaire   | 9 à 12 années (équivalent lycée dans le système français)    |
-| supérieur    | > 12 années                                                  |
+  | **modalité**   | **description**                                                |
+  | :------------: | :------------------------------------------------------------- |
+  |  élémentaire   | <= 8 années (équivalent collège dans le système français)      |
+  |   secondaire   | 9 à 12 années (équivalent lycée dans le système français)      |
+  |   supérieur    | > 12 années                                                    |
 
 ### Conversion des unités de mesures
 
@@ -257,6 +268,7 @@ Aucune erreur logique ne fut retrouvée.
 ```{r}
 #| echo: true
 #| code-fold: false
+
 df_base |>
   filter(dschdte < sadmdte | dthdte < dschdte) |>
   nrow()
@@ -373,7 +385,8 @@ Les variables catégorielles ont pu être regroupées en 4 catégories :
 #| label: fig-uv-demo
 #| out-width: 90%
 #| fig-align: center
-#| fig-cap: !expr '.title_uv_demo'
+#| fig-cap: !expr ".title_uv_demo"
+
 .acro <- opts$acro |>
   with(mget(str_subset(names(opts$acro), str_u(levels(df_setup$insur))))) |>
   acro_str(collapse = opts$sep$ext)
@@ -392,6 +405,7 @@ include_graphics("output/fig_uv_demo.png")
 ```{r}
 #| label: fig-uv-atcd
 #| fig-cap: !expr ".title_descr$uv[2]"
+
 include_graphics("output/fig_uv_atcd.png")
 ```
 
@@ -401,6 +415,7 @@ include_graphics("output/fig_uv_atcd.png")
 #| label: fig-uv-pv
 #| out-width: 85%
 #| fig-cap: !expr ".title_descr$uv[3]"
+
 include_graphics("output/fig_uv_pv.png")
 ```
 
@@ -410,6 +425,7 @@ include_graphics("output/fig_uv_pv.png")
 #| label: fig-uv-bio
 #| out-width: 85%
 #| fig-cap: !expr ".title_descr$uv[4]"
+
 include_graphics("output/fig_uv_bio.png")
 ```
 
@@ -417,13 +433,15 @@ include_graphics("output/fig_uv_bio.png")
 
 ```{r}
 #| label: tbl-uv-bin
-#| tbl-cap: !expr '.title_descr$uv[5]'
+#| tbl-cap: !expr ".title_descr$uv[5]"
+
 tbl_uv_bin
 ```
 
 ```{r}
 #| label: tbl-uv-qt
-#| tbl-cap: !expr '.title_descr$uv[6]'
+#| tbl-cap: !expr ".title_descr$uv[6]"
+
 tbl_uv_qt
 ```
 
@@ -437,8 +455,8 @@ Seules les distributions du **poids** (`weight`) et du **score APACHE III** (`sc
 
 L'analyse précédente a été reproduite après croisement sur 2 variables :
 
-  - Mortalité à 30 jours (`ev_death_30`)
-  - Cathétérisme droit (`rhc`)
+- Mortalité à 30 jours (`ev_death_30`)
+- Cathétérisme droit (`rhc`)
 
 ## Mortalité à 30 jours
 
@@ -447,24 +465,28 @@ L'analyse précédente a été reproduite après croisement sur 2 variables :
 ```{r}
 #| label: tbl-bv-ql-demo-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[1]"
+
 tbl_bv_ql$demo$demo_ev_death_30
 ```
 
 ```{r}
 #| label: tbl-bv-ql-atcd-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[2]"
+
 tbl_bv_ql$atcd$atcd_ev_death_30
 ```
 
 ```{r}
 #| label: tbl-bv-ql-pv-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[3]"
+
 tbl_bv_ql$pv$pv_ev_death_30
 ```
 
 ```{r}
 #| label: tbl-bv-ql-bio-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[4]"
+
 tbl_bv_ql$bio$bio_ev_death_30
 ```
 
@@ -473,12 +495,14 @@ tbl_bv_ql$bio$bio_ev_death_30
 ```{r}
 #| label: tbl-bv-qt-bin-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[5]"
+
 tbl_bv_qt$bin$ev_death_30
 ```
 
 ```{r}
 #| label: tbl-bv-qt-qt-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[6]"
+
 tbl_bv_qt$qt$ev_death_30
 ```
 
@@ -489,24 +513,28 @@ tbl_bv_qt$qt$ev_death_30
 ```{r}
 #| label: tbl-bv-ql-rhc-demo
 #| tbl-cap: !expr ".title_descr$rhc[1]"
+
 tbl_bv_ql$demo$demo_rhc
 ```
 
 ```{r}
 #| label: tbl-bv-ql-rhc-atcd
 #| tbl-cap: !expr ".title_descr$rhc[2]"
+
 tbl_bv_ql$atcd$atcd_rhc
 ```
 
 ```{r}
 #| label: tbl-bv-ql-rhc-pv
 #| tbl-cap: !expr ".title_descr$rhc[3]"
+
 tbl_bv_ql$pv$pv_rhc
 ```
 
 ```{r}
 #| label: tbl-bv-ql-rhc-bio
 #| tbl-cap: !expr ".title_descr$rhc[4]"
+
 tbl_bv_ql$bio$bio_rhc
 ```
 
@@ -515,12 +543,14 @@ tbl_bv_ql$bio$bio_rhc
 ```{r}
 #| label: tbl-bv-qt-bin-rhc
 #| tbl-cap: !expr ".title_descr$rhc[5]"
+
 tbl_bv_qt$bin$rhc
 ```
 
 ```{r}
 #| label: tbl-bv-qt-qt-rhc
 #| tbl-cap: !expr ".title_descr$rhc[6]"
+
 tbl_bv_qt$qt$rhc
 ```
 
@@ -598,18 +628,21 @@ La distribution du score de propension dans chaque groupe était la suivante
 ```{r}
 #| label: fig-sp-dist-global
 #| out-width: 85%
-#| fig-cap: !expr '.title_sp_dist$global'
+#| fig-cap: !expr ".title_sp_dist$global"
 #| lightbox:
 #|   group: fig-sp-dist
+
 include_graphics("output/fig_dist_global.png")
 ```
 
 Dans une situation où le score de propension prédirait parfaitement l'allocation du cathétérisme, il n'y aurait aucune observation située au-dessus de la ligne horizontale chez les sujets sans et aucune située en dessous chez les sujets avec.
 
 Dans le cas présent, parmi les sujets sans cathétérisme, une faible proportion était
-considérée éligible à tord. Le modèle prédisait efficacement la non-allocution du cathétérisme chez les sujets ne l'ayant effectivement pas subi, ce qui laissait supposer d'une **bonne spécificité**.
+considérée éligible à tord.
+Le modèle prédisait efficacement la non-allocution du cathétérisme chez les sujets ne l'ayant effectivement pas subi, ce qui laissait supposer d'une **bonne spécificité**.
 
-Parmi les sujets avec cathétérisme, le modèle ne semblait pas capable de déterminer la propension des sujets à subir le geste. Autrement dit le modèle prédisait mal l'allocution du cathétérisme chez les sujets l'ayant effectivement subi, ce qui laissait supposer d'une **faible sensibilité**.
+Parmi les sujets avec cathétérisme, le modèle ne semblait pas capable de déterminer la propension des sujets à subir le geste.
+Autrement dit le modèle prédisait mal l'allocution du cathétérisme chez les sujets l'ayant effectivement subi, ce qui laissait supposer d'une **faible sensibilité**.
 
 ## Performances du modèle
 
@@ -621,6 +654,7 @@ Les performances supposées du score de propension ont pu être évaluées à l'
 #| label: fig-sp-roc
 #| out-width: 50%
 #| fig-cap: Courbe ROC du score de propension pour la classification du cathétérisme droit.
+
 include_graphics("output/fig_roc.png")
 ```
 
@@ -647,16 +681,18 @@ se <- label_p()(vp / total_p)
 
 ## Appariement
 
-Les sujets ont été appariés sur le score de propension selon un ratio **1:1**, par la méthode des plus proches voisins. Un caliper fixé à **`r .sp_dist_match$cal`** (`r .sp_dist_match$cal/0.2` * 0.2) semblait être un bon compromis entre qualité de l'appariement et préservation de la puissance.
+Les sujets ont été appariés sur le score de propension selon un ratio **1:1**, par la méthode des plus proches voisins.
+Un caliper fixé à **`r .sp_dist_match$cal`** (`r .sp_dist_match$cal/0.2` \* 0.2) semblait être un bon compromis entre qualité de l'appariement et préservation de la puissance.
 
 {{< script scripts/fig_dist.R suffix=(2) >}}
 
 ```{r}
 #| label: fig-sp-dist-match
 #| out-width: 85%
-#| fig-cap: !expr '.title_sp_dist_match'
+#| fig-cap: !expr ".title_sp_dist_match"
 #| lightbox:
 #|   group: fig-sp-dist
+
 include_graphics("output/fig_dist_match.png")
 ```
 
@@ -676,7 +712,8 @@ L'équilibrage des variables entre les groupes pouvait être évalué par le cal
 ```{r}
 #| label: fig-sp-smd
 #| out-width: 60%
-#| fig-cap: !expr '.title_smd'
+#| fig-cap: !expr ".title_smd"
+
 .title_smd <- str_fig(
   title = "Différences moyennes standardisées (SMD) pour chaque variable
     constitutive du score de propension, {str_color('avant', .pal[1])}
@@ -744,7 +781,6 @@ Une courbe de survie a été produite selon la méthode de Kaplan-Meier, ainsi q
 {{< script scripts/fig_surv.R >}}
 
 ::: panel-tabset
-
 ```{r}
 .title_surv <- map(
   c(non_ajusté = "sans", ajusté = "après"),
@@ -765,9 +801,10 @@ Une courbe de survie a été produite selon la méthode de Kaplan-Meier, ainsi q
 
 ```{r}
 #| label: fig-surv-non-ajusté
-#| fig-cap: !expr '.title_surv$non_ajusté'
+#| fig-cap: !expr ".title_surv$non_ajusté"
 #| lightbox:
 #|   group: fig-surv
+
 include_graphics("output/fig_surv_non_ajusté.png")
 ```
 
@@ -775,12 +812,12 @@ include_graphics("output/fig_surv_non_ajusté.png")
 
 ```{r}
 #| label: fig-surv-ajusté
-#| fig-cap: !expr '.title_surv$ajusté'
+#| fig-cap: !expr ".title_surv$ajusté"
 #| lightbox:
 #|   group: fig-surv
+
 include_graphics("output/fig_surv_ajusté.png")
 ```
-
 :::
 
 Sans ajustement sur le score de propension, le groupe avec cathétérisme présentait un risque **significativement plus élevé** de mortalité à 30 jours comparé au groupe sans cathétérisme.
@@ -797,11 +834,12 @@ Un **essai randomisé** permettrait de porter de meilleures conclusions quant à
 
 \
 
-***
+--------------------------------------------------------------------------------
 
 # Session {.unnumbered .unlisted}
 
 ```{r}
 #| echo: true
+
 sessioninfo::session_info(pkgs = "attached")
 ```

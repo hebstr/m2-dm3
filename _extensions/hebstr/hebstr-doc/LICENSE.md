@@ -19,3 +19,26 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Third-party components
+
+Bundled assets keep the licence they arrived under, each with its own text alongside the files it covers:
+
+| Component | Location | Licence |
+| --- | --- | --- |
+| Luciole | `_extensions/hebstr-doc/fonts/Luciole.LICENSE` | CC-BY 4.0 |
+| Fira Code | `_extensions/hebstr-doc/fonts/FiraCode.LICENSE` | SIL OFL 1.1 |
+| Font Awesome Free | `_extensions/hebstr-doc/fonts/FontAwesome.LICENSE` | CC-BY 4.0 + SIL OFL 1.1 |
+| Material Icon Theme | `_extensions/hebstr-doc/icons/MaterialIconTheme.LICENSE` | MIT |
+| add-code-files (JS) | `_extensions/hebstr-doc/filters/add-code-files.LICENSE` | MIT |
+| collab-comments (Lua filter) | `_extensions/hebstr-doc/filters/collab-comments.LICENSE` | MIT |
+| code-window (embedded extension) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/LICENSE` | MIT |
+| quarto-lua-modules (vendored by code-window) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/_vendor/quarto-lua-modules/LICENSE` | MIT |
+| quarto-wizard schema validator (vendored by code-window) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/_vendor/quarto-wizard/LICENSE` | MIT |
+| R syntax definition | `_extensions/hebstr-doc/syntax/RSyntax.LICENSE` | **GPL v2** |
+| Word reference document | `_extensions/hebstr-doc/template.LICENSE` | **GPL v2 or later** |
+
+`syntax/r.xml` and `template.dotx` are the two copyleft components.
+`syntax/r.xml` derives from the KDE Kate highlighting module for R and stays GPL v2.
+`template.dotx` derives from the reference document Pandoc ships and stays under Pandoc's licence, GPL version 2 or later.
+No other file in this extension derives from either, so the MIT terms above govern the rest.

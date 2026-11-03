@@ -1,18 +1,31 @@
 /*-- scss:defaults --*/
 
+// Typography (invariant)
 $font-family-sans-serif: "Luciole", system-ui, sans-serif !default;
 $font-family-monospace: "Fira Code", ui-monospace, monospace !default;
-$toc-font-size: 0.825rem !default;
+$font-size-root: 1rem !default;
+$toc-font-size: 0.8rem !default;
 $callout-icon-scale: -10% !default;
 
-$code-foreground-color: #ffffff !default;
+// Tabsets (invariant)
+$tab-surface: color-mix(in srgb, var(--primary), transparent 93%) !default;
+
+// Code chrome (invariant)
+$code-foreground-color: #fff !default;
 $code-background-color: #262624 !default;
-$code-comment-color: #6c675f !default;
+$code-comment-color: #8d8d8d !default;
 $code-window-titlebar-bg: #212120 !default;
 $code-window-border: #383835 !default;
 $code-window-line-divider: #383835 !default;
 $code-window-muted: #938e87 !default;
-$code-window-line-number: #5a5955 !default;
+$code-window-line-number: #7b7a76 !default;
+
+// Filetree (invariant)
+$filetree-bg: $code-background-color !default;
+$filetree-fg: #d6d3cd !default;
+$filetree-muted: $code-window-muted !default;
+$filetree-highlight: $code-foreground-color !default;
+$filetree-guide: #7d7b76 !default;
 
 /*-- scss:rules --*/
 
@@ -24,12 +37,10 @@ $code-window-line-number: #5a5955 !default;
   --primary-dark: #{$primary-dark};
   --neutral: #{$neutral};
   --em-background-color: #{$em-background-color};
-  --surface-default: #{$surface-default};
   --caption-color: #{$caption-color};
-  --figure-shadow: #{$figure-shadow};
   --str-color: #{$str-color};
   --dig-color: #{$dig-color};
-  --tab-background: #{$tab-background};
+  --tab-surface: #{$tab-surface};
   --code-foreground-color: #{$code-foreground-color};
   --code-background-color: #{$code-background-color};
   --code-comment-color: #{$code-comment-color};
@@ -38,6 +49,11 @@ $code-window-line-number: #5a5955 !default;
   --code-window-line-divider: #{$code-window-line-divider};
   --code-window-muted: #{$code-window-muted};
   --code-window-line-number: #{$code-window-line-number};
+  --filetree-bg: #{$filetree-bg};
+  --filetree-fg: #{$filetree-fg};
+  --filetree-muted: #{$filetree-muted};
+  --filetree-highlight: #{$filetree-highlight};
+  --filetree-guide: #{$filetree-guide};
   --callout-note-color: #{$callout-note-color};
   --callout-tip-color: #{$callout-tip-color};
   --callout-caution-color: #{$callout-caution-color};
@@ -57,7 +73,21 @@ body {
   background-color: var(--primary-surface);
 }
 
-.cb1, .cb2, .nb {
+// Hyphenation is what keeps justification from stretching word spaces. It
+// engages wherever the reader's browser carries a dictionary for the document
+// language, and falls back to wider spaces where none is installed.
+#quarto-document-content p:not(:where(figure p)) {
+  text-align: justify;
+  hyphens: auto;
+}
+
+#quarto-document-content .column-margin p {
+  text-align: left;
+}
+
+.cb1,
+.cb2,
+.nb {
   font-weight: bold;
 }
 
@@ -73,7 +103,9 @@ body {
   color: color-mix(in srgb, var(--neutral), white 30%);
 }
 
-.nc, .str, .dig {
+.nc,
+.str,
+.dig {
   background-color: var(--em-background-color);
   font-family: $font-family-monospace;
   font-size: 0.9rem;
@@ -96,8 +128,8 @@ body {
 }
 
 .blockquote {
-  color: currentColor;
-  border-color: currentColor;
+  color: currentcolor;
+  border-color: currentcolor;
 }
 
 mjx-container {
@@ -105,31 +137,35 @@ mjx-container {
 }
 
 .panel-tabset {
-  --tab-surface: color-mix(in srgb, var(--primary), transparent 93%);
   .nav-tabs {
     margin-top: 2rem;
+
     --bs-nav-tabs-border-color: none;
     --bs-nav-tabs-link-hover-border-color: var(--primary-back);
     --bs-nav-link-color: var(--primary-dark);
     --bs-nav-link-hover-color: var(--primary);
     --bs-nav-tabs-link-active-color: var(--primary);
     --bs-nav-tabs-link-active-bg: var(--tab-surface);
-    --bs-nav-tabs-link-active-border-color: var(--primary-back) var(--primary-back) var(--tab-surface);
+    --bs-nav-tabs-link-active-border-color: var(--primary-back)
+      var(--primary-back) var(--tab-surface);
   }
+
   .nav-link.active {
     border-bottom-color: var(--primary);
     border-radius: 10px 10px 0 0;
   }
+
   .nav-link:not(.active) {
     background-color: var(--primary-back);
     border-bottom-color: var(--tab-surface);
     border-radius: 10px 10px 0 0;
   }
+
   .tab-content {
     background-color: var(--tab-surface);
     border-color: var(--tab-surface);
     border-top: 1px solid var(--tab-surface);
-    border-radius: 0 10px 10px 10px;
+    border-radius: 0 10px 10px;
     margin-bottom: 2rem;
   }
 }
@@ -138,47 +174,50 @@ mjx-container {
   background-color: var(--primary-back);
   border-radius: 12px;
   padding: 1.5rem 2rem;
+
   .title {
     margin-top: 0.5rem;
     border-bottom: none;
     color: var(--primary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
   }
+
   .subtitle {
     font-size: 24px;
     color: var(--primary-dark);
   }
+
   .quarto-title-meta-heading,
   .block-title {
     color: var(--primary-dark);
   }
+
   .quarto-title-block > div {
     gap: 1.5rem;
-  }
-  .quarto-color-scheme-toggle.hebstr-title-toggle {
-    display: inline-flex;
-    color: var(--primary-dark);
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    &:hover {
-      color: var(--primary);
-    }
   }
 }
 
 .quarto-color-scheme-toggle {
   > i.bi::before {
     background-image: none !important;
-    font-family: "Font Awesome 7 Free" !important;
-    // font-weight: 900 !important;
+    font-family: "Font Awesome 7 Free", sans-serif !important;
     content: "\f185";
     color: inherit;
   }
+
   &.alternate > i.bi::before {
     content: "\f186";
+  }
+
+  // The toggle is a link whose only child is this glyph, so without alternative
+  // text the private-use codepoint becomes its entire accessible name.
+  @supports (content: "a" / "b") {
+    > i.bi::before {
+      content: "\f185" / "";
+    }
+
+    &.alternate > i.bi::before {
+      content: "\f186" / "";
+    }
   }
 }
 
@@ -186,21 +225,46 @@ mjx-container {
   text-align: left;
   padding: 1rem 1rem 0 1.5rem;
   background-color: var(--primary-back);
+
+  // The row is built by `filters/toggle-position.html` ; without it the toggle
+  // keeps Quarto's floating position.
+  .hebstr-toggle-row {
+    display: flex;
+    justify-content: center;
+
+    // Cancels the panel's asymmetric padding, or the toggle centres on the toc
+    // column rather than on the panel.
+    margin: 0 -1rem 0.75rem -1.5rem;
+  }
+
+  .quarto-color-scheme-toggle.hebstr-sidebar-toggle {
+    display: inline-flex;
+    color: var(--primary-dark);
+    font-size: 1.5rem;
+
+    &:hover {
+      color: var(--primary);
+    }
+  }
+
   h2#toc-title {
     font-size: 0.95rem;
     color: var(--primary-dark);
     margin: 0 0 0.3rem 0.2rem;
   }
+
   nav a#toc-title {
     font-size: inherit;
     color: inherit;
     margin: 0;
   }
+
   .toc-active {
     > ul a {
       border-left: 2px solid var(--primary-surface);
       padding-bottom: 0.3rem;
     }
+
     :is(ul > li, ul > li > ul > li) > a.active {
       border-left: 2px solid var(--primary);
     }
@@ -212,12 +276,19 @@ mjx-container {
   font-weight: 700;
 }
 
-h2, h3, h4, h5 {
+h2,
+h3,
+h4,
+h5 {
   margin-top: 1.5em;
   margin-bottom: 1rem;
 }
 
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   border-bottom: 3px solid var(--primary-back);
   padding-bottom: 0.3rem;
   font-weight: normal;
@@ -252,30 +323,76 @@ h5 {
   margin-bottom: 0.8rem;
 }
 
+// A figure with no cross-reference label is not a float and carries no
+// `.quarto-float-caption`, so the two selectors never meet on one element.
+.quarto-float-caption,
+figure.figure > figcaption:not(.quarto-float-caption) {
+  font-size: 0.95rem;
+  font-weight: bold;
+  line-height: 1.5;
+  color: var(--caption-color);
+}
+
 .quarto-float {
-  &-caption {
-    font-size: 0.95rem;
-    font-weight: bold;
-    line-height: 1.5;
-    color: var(--caption-color);
-  }
   &-subcaption {
     font-weight: normal;
     font-size: 0.85rem;
     color: var(--neutral);
   }
+
   &-fig {
     padding-bottom: 1em;
   }
-  &-tbl {
+
+  // The `anx` custom float carries no built-in styling. Keyed on the float
+  // type, this rule is the one that survives a document moving the caption,
+  // where the position-keyed rule below stops applying.
+  &-tbl,
+  &-anx {
     margin-top: 2rem;
     text-align: center;
   }
 }
 
+figure.figure > figcaption {
+  &:not(.quarto-float-caption) {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  &:not(.quarto-float-caption),
+  &.quarto-float-caption-top {
+    text-align: center;
+  }
+}
+
+// `gt` declares its table width in pixels and wraps the table in a scrolling
+// container, so a table wider than the body column is truncated behind a
+// horizontal scrollbar. The cap keeps the declared width wherever it fits and
+// compresses the columns instead of scrolling where it does not.
+table.gt_table {
+  max-width: 100%;
+}
+
 div.csl-right-inline {
   padding-left: 0;
   padding-bottom: 0.5em;
+}
+
+// Quarto sets the appendix (footnotes, citations) background to `$body-bg`,
+// which is a plain white/black distinct from the page's tinted surface, so the
+// block reads as a mismatched box. Align it to the page background.
+#quarto-appendix.default {
+  background-color: var(--primary-surface);
+  border-top-color: var(--primary-back);
+}
+
+// LIGHTBOX --------------------------------------------------------------------
+
+.glightbox-container .gslide-image img[src^="data:image/svg+xml"] {
+  width: 90vw;
+  height: 90vh;
+  object-fit: contain;
 }
 
 // CODE ------------------------------------------------------------------------
@@ -287,8 +404,9 @@ div.sourceCode {
   border-radius: 12px;
   padding: 1em;
   margin: 1em 0;
-  font-weight: bold;
   line-height: 1.4;
+  font-size: 0.9rem;
+
   ::selection {
     background-color: var(--code-comment-color);
     color: var(--code-foreground-color);
@@ -299,38 +417,69 @@ code:not(.sourceCode) {
   color: var(--primary);
   background-color: var(--primary-back) !important;
   padding: 0.2rem 0.4rem !important;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 code span {
   .va {
     color: var(--code-foreground-color);
   }
-  .dv, .fl {
+
+  .dv,
+  .fl,
+  .dt {
     color: #ff7869;
   }
+
   .cn {
     color: #ffbc6a;
     font-weight: bold;
   }
-  .st, .ss {
+
+  .st,
+  .ss {
     color: #c5ff93;
   }
-  .op, .ot, .sc {
+
+  .op,
+  .ot,
+  .sc {
     color: #a2fff6;
-    font-weight: normal;
   }
-  .kw, .cf, .im {
+
+  .kw,
+  .cf {
     color: #d08aff;
     font-weight: bold;
   }
-  .fu, .bu, .ex {
-    color: #90E1FF;
+
+  .im,
+  .re {
+    color: #fad430;
   }
-  .co, .do {
+
+  .im {
+    font-weight: bold;
+  }
+
+  // Quarto's highlight style ships RegionMarker with a near-white background,
+  // which the brackets borrowing that class would otherwise carry.
+  .re {
+    background-color: transparent;
+  }
+
+  .fu,
+  .bu,
+  .ex {
+    color: #90e1ff;
+  }
+
+  .co,
+  .do {
     font-style: normal !important;
     color: var(--code-comment-color);
   }
+
   .at {
     color: var(--code-foreground-color);
   }
@@ -340,6 +489,7 @@ code span {
   margin: 1rem;
   border-radius: 5px;
   background-color: var(--code-background-color);
+
   &:hover {
     background-color: var(--code-comment-color);
   }
@@ -350,15 +500,34 @@ pre {
     > span {
       background-color: var(--code-background-color);
       color: var(--code-foreground-color);
+
       > a {
         color: var(--code-comment-color);
       }
     }
   }
+
   code:not(.sourceCode) {
     background-color: var(--code-background-color);
     color: var(--code-comment-color);
     padding: 1rem;
+  }
+}
+
+.cell-output > pre {
+  background-color: var(--code-background-color);
+  color: var(--code-foreground-color);
+  border-radius: 12px;
+  padding: 1em;
+  margin: 1em 0;
+  line-height: 1.4;
+  font-size: 0.9rem;
+
+  > code {
+    background-color: transparent !important;
+    color: inherit;
+    padding: 0 !important;
+    font-size: inherit;
   }
 }
 
@@ -367,15 +536,16 @@ body details.code-fold {
   > summary {
     width: fit-content;
     font-family: $font-family-monospace;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     letter-spacing: 1px;
     color: var(--neutral);
     background-color: transparent;
     margin-bottom: 0;
     padding: 0.4rem 1rem;
     border-radius: 10px;
-    border: 2px solid currentColor;
+    border: 2px solid currentcolor;
   }
+
   &[open] > summary {
     border: 2px solid var(--code-window-titlebar-bg);
     background-color: var(--code-window-titlebar-bg);
@@ -397,12 +567,15 @@ body div[data-code-filename] {
     background-color: var(--code-window-titlebar-bg);
     border: 1px solid var(--code-window-border);
     border-top-left-radius: 0;
+
     .code-with-filename-file {
       display: none;
     }
+
     pre.numberSource {
       margin-left: 0;
       padding: 1rem;
+
       code > span {
         position: static;
         left: auto;
@@ -414,6 +587,7 @@ body div[data-code-filename] {
 .code-with-filename.code-window-default,
 .code-with-filename.code-window-auto {
   --code-window-titlebar-height: 2.5rem;
+
   position: relative;
   margin: 1.2em 0;
   background-color: var(--code-window-titlebar-bg);
@@ -426,6 +600,7 @@ body div[data-code-filename] {
     background-color: var(--code-window-titlebar-bg);
     border-bottom: 1px solid var(--code-window-border);
     gap: 0;
+
     pre {
       flex: 1;
       margin: 0;
@@ -508,6 +683,7 @@ body div[data-code-filename] {
 
 .callout {
   border-radius: 5px;
+
   .callout-title-container {
     font-size: 1rem;
     text-align: left;
@@ -516,9 +692,11 @@ body div[data-code-filename] {
     padding-left: 0.25rem;
     padding-right: 1.3rem;
   }
+
   &.callout-titled:has(.callout-body > *) .callout-title-container {
     margin-bottom: 0.4rem;
   }
+
   .callout-body {
     padding-right: 1.3rem;
   }
@@ -539,10 +717,11 @@ body div[data-code-filename] {
     background-size: 1.2rem;
     margin-top: 0.3rem;
   }
+
   .callout-icon::before {
     background-image: none !important;
     height: auto;
-    font-family: "Font Awesome 7 Free";
+    font-family: "Font Awesome 7 Free", sans-serif;
     font-style: normal;
     font-weight: 900;
     font-size: 1.1rem;
@@ -550,35 +729,199 @@ body div[data-code-filename] {
 }
 
 $callout-types: (
-  "note": ("\f05a", 40%, 0%, 20%),
-  "important": ("\f06a", 30%, 0%, 10%),
-  "tip": ("\f0eb", 60%, 0%, 25%),
-  "caution": ("\f06d", 25%, 10%, 30%),
-  "warning": ("\f071", 25%, 0%, 15%),
+  ("note", "\f05a", 40%, 0%, 20%),
+  ("important", "\f06a", 30%, 0%, 10%),
+  ("tip", "\f0eb", 60%, 0%, 25%),
+  ("caution", "\f06d", 25%, 10%, 30%),
+  ("warning", "\f071", 25%, 0%, 15%)
 );
 
-@each $type, $conf in $callout-types {
-  $icon: nth($conf, 1);
-  $border-light: nth($conf, 2);
-  $header-dark: nth($conf, 3);
-  $body-dark: nth($conf, 4);
-
+@each $type, $icon, $border-light, $header-dark, $body-dark in $callout-types {
   div.callout.callout-#{$type} {
-    border: 2px solid color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-mix-base) #{$border-light});
+    border: 2px
+      solid
+      color-mix(
+        in srgb,
+        var(--callout-#{$type}-color),
+        var(--callout-mix-base) #{$border-light}
+      );
     border-left: 5px solid var(--callout-#{$type}-color);
-    background-color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-mix-base) var(--callout-bg-mix));
+    background-color: color-mix(
+      in srgb,
+      var(--callout-#{$type}-color),
+      var(--callout-mix-base) var(--callout-bg-mix)
+    );
+
     .callout-icon::before {
       content: "#{$icon}";
     }
+
+    // Generated content counts toward the accessible name, so the private-use
+    // codepoint is given empty alternative text where that syntax is understood ;
+    // elsewhere the rule above stands and the glyph renders unchanged.
+    @supports (content: "a" / "b") {
+      .callout-icon::before {
+        content: "#{$icon}" / "";
+      }
+    }
+
     .callout-header {
       @if $header-dark == 0% {
         color: var(--callout-#{$type}-color);
       } @else {
-        color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-text-mix) #{$header-dark});
+        color: color-mix(
+          in srgb,
+          var(--callout-#{$type}-color),
+          var(--callout-text-mix) #{$header-dark}
+        );
       }
     }
+
     .callout-body {
-      color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-text-mix) #{$body-dark});
+      color: color-mix(
+        in srgb,
+        var(--callout-#{$type}-color),
+        var(--callout-text-mix) #{$body-dark}
+      );
     }
+  }
+}
+
+.filetree {
+  font-family: $font-family-monospace;
+  font-size: 0.85rem;
+  line-height: 1.9;
+  margin-block: 1.5rem;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid var(--code-window-border);
+  border-radius: 0.4rem;
+  background-color: var(--filetree-bg);
+  color: var(--filetree-fg);
+
+  // Padding, border and background sit on the container, so a tree filtered down
+  // to nothing would still draw a card. The render warning names the cause.
+  &:has(> ul:empty) {
+    display: none;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  ul ul {
+    margin-left: 0.55rem;
+    padding-left: 0.95rem;
+    border-left: 1px solid var(--filetree-guide);
+  }
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.7rem;
+  }
+
+  li > ul {
+    flex-basis: 100%;
+  }
+
+  // `--ft-icon` is set per entry by the filter, which reads the SVG and inlines
+  // it. Overriding one icon means writing a `background-image` on the matching
+  // `.ft-i-<key>`, which ties this default on specificity and wins on load
+  // order, so the override layer must come last in the `theme:` list.
+  .ft-name::before {
+    content: "";
+    display: inline-block;
+    width: 1.1em;
+    height: 1.1em;
+    margin-right: 0.45rem;
+    vertical-align: -0.2em;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-image: var(--ft-icon);
+  }
+
+  .ft-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  // The second selector is the dynamic-mode shape: an expandable folder nests
+  // its name under `details > summary`, out of reach of the child combinator.
+  // A descendant selector would reach its children too and highlight the subtree.
+  .ft-hl > .ft-name,
+  .ft-hl > details > summary > .ft-name {
+    font-weight: 700;
+    color: var(--filetree-highlight);
+  }
+
+  .ft-more > .ft-name {
+    color: var(--filetree-muted);
+
+    &::before {
+      content: none;
+    }
+  }
+
+  .ft-desc {
+    font-family: $font-family-sans-serif;
+    font-size: 0.8rem;
+    color: var(--filetree-muted);
+
+    // `!important` answers the `!important` on `code:not(.sourceCode)`, which
+    // itself outranks Quarto's `p code:not(.sourceCode)`; specificity alone
+    // cannot win here.
+    code {
+      padding: 0 !important;
+      font-size: inherit;
+      color: inherit;
+      background: none !important;
+    }
+  }
+}
+
+// Dynamic mode (`mode: dynamic`) wraps each expandable folder in a
+// `<details>/<summary>`. Scoped to `.filetree-dynamic` so the static tree keeps
+// its rules untouched. The summary is realigned onto the file row so both share
+// one vertical rhythm, and the folder icon itself carries the open/closed state.
+.filetree-dynamic {
+  li:has(> details) {
+    display: block;
+  }
+
+  details {
+    margin: 0;
+  }
+
+  summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.7rem;
+    cursor: pointer;
+    list-style: none;
+
+    // Quarto's default `details > summary` colour is theme-dependent and matches
+    // the summary directly, so it outranks the inherited `--filetree-fg` that the
+    // file rows keep. Restore the invariant foreground on the dark box.
+    color: var(--filetree-fg);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  // The folder icon is the affordance : an expanded folder swaps to the `-open`
+  // Material variant carried by `--ft-icon-open`, so no chevron is needed and
+  // folder and file icons stay aligned on the same edge.
+  details[open] > summary .ft-name::before {
+    background-image: var(--ft-icon-open);
   }
 }
