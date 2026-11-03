@@ -10,9 +10,9 @@ tbl_uv_qt <- df_setup |>
     label ~ str_glue("**{opts$labs$header}**"),
     stat_6 ~ str_glue("**{names(opts$qt_stat$mean)}**")
   ) |>
-  gt_format()
+  tbl_format(width = 650)
 
-easy_out(tbl_uv_qt, width = 650)
+easy_out(tbl_uv_qt)
 
 ### BIN ------------------------------------------------------------------------
 
@@ -24,6 +24,6 @@ tbl_uv_bin <- df_setup |>
     missing = "no"
   ) |>
   gtsum_format(label_stat = names(opts$ql_stat$n)) |>
-  gt_format()
+  tbl_format(width = 400)
 
-easy_out(tbl_uv_bin, width = 400)
+easy_out(tbl_uv_bin)

@@ -1,4 +1,4 @@
-test <- as_mapper(
+.fig_dist_fun <- as_mapper(
   ~ ggplot(.x) +
     aes(y = sp) +
     geom_mirror_histogram(
@@ -23,7 +23,7 @@ test <- as_mapper(
       ),
       x = c(50, -50),
       size = 3,
-      family = opts$font,
+      family = opts$font$alpha,
       color = rev(opts$palette)
     ) +
     labs(
@@ -36,9 +36,6 @@ test <- as_mapper(
     theme_bar(panel.background = element_rect(fill = "grey95"))
 )
 
-map(list(global = df_sp, match = df_match), test) |>
-  easy_out_map(
-    filename = "fig_dist",
-    height = 3.5,
-    width = 6
-  )
+fig_dist <- map(list(global = df_sp, match = df_match), .fig_dist_fun)
+
+easy_out(fig_dist, height = 3.5, width = 6, export = TRUE)

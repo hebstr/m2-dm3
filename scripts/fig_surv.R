@@ -1,4 +1,4 @@
-fig_surv <- \(x, y) {
+.fig_surv_fun <- \(x, y) {
   .surv <-
     lst(
       data = mutate(
@@ -49,7 +49,7 @@ fig_surv <- \(x, y) {
       stats_label = list("{n.risk} ({cum.event})" = "No. at Risk (Events)"),
       risktable_group = "risktable_stats",
       size = 2,
-      family = opts$font,
+      family = opts$font$alpha,
       theme = theme_risktable(plot_margin = 5)
     ) +
     add_risktable_strata_symbol(symbol = "\U2014", size = 8) +
@@ -66,7 +66,7 @@ fig_surv <- \(x, y) {
       size = 2.25,
       hjust = 1,
       vjust = 1,
-      family = opts$font
+      family = opts$font$alpha
     ) +
     scale_color_manual(values = opts$palette) +
     scale_ggsurvfit(
@@ -84,9 +84,6 @@ fig_surv <- \(x, y) {
     theme_tte()
 }
 
-imap(compar_df, fig_surv) |>
-  easy_out_map(
-    filename = "fig_surv",
-    height = 3.25,
-    width = 6
-  )
+fig_surv <- imap(compar_df, .fig_surv_fun)
+
+easy_out(fig_surv, height = 3.25, width = 6, export = TRUE)

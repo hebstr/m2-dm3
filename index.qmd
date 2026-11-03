@@ -6,10 +6,6 @@ author:
   email: "ju.diez@protonmail.com"
 lang: fr
 date: last-modified
-format:
-  hebstr-doc-html:
-    code-tools:
-      source: https://github.com/hebstr/m2-dm3
 ---
 
 ```{r}
@@ -20,12 +16,7 @@ library(gt)
 
 options(easy_out.quiet = TRUE)
 
-# .gt_format <- hebstr::gt_format
-# gt_format <- \(x, ..., font_size = 16, row_padding = 10) {
-#   .gt_format(x, font_size = font_size, row_padding = row_padding, ...)
-# }
-
-source(here::here("scripts", "_setup.R"))
+source("setup.R")
 
 auto_exec()
 
@@ -45,10 +36,10 @@ La pose de sonde de Swan-Ganz était qualifiée pour la suite de **cathétérism
 
 L'ensemble du code est divisé en 2 types de scripts :
 
-- Préparation des données (`_setup.R`)
+- Préparation des données (`setup.R`)
 - Production des tableaux et figures (`tbl_*.R` ou `fig_*.R`)
 
-Les paramètres et objets définis dans `_setup.R` sont injectés dans les scripts tableaux et figures, exécutés en aval, afin d'éviter toute duplication de code.
+Les paramètres et objets définis dans `setup.R` sont injectés dans les scripts tableaux et figures, exécutés en aval, afin d'éviter toute duplication de code.
 
 Les tableaux et figures numérotés sont précédés de leur script respectif (replié par défaut).
 Si plusieurs éléments sont produits par un même script, celui-ci est placé soit uniquement devant le premier élément, soit placé à plusieurs reprises avec une numérotation.
@@ -64,7 +55,7 @@ Aucun large language model n'est utilisé pour la rédaction du code ou du texte
 
 {{< script .Rprofile >}}
 
-{{< script scripts/_setup.R >}}
+{{< script setup.R >}}
 
 # Data management
 
@@ -100,7 +91,7 @@ Les variables suivantes contenaient des valeurs numériques **égales à 0 et ju
 opts$view$data |>
   filter(!is.na(n_miss), str_ends(variable, "weight|pam|fc|fr")) |>
   select(variable, label, n_ab = n_miss, p_ab = p_miss) |>
-  gt_qmd()
+  tbl_qmd()
 ```
 
 ### Valeurs manquantes
@@ -108,10 +99,10 @@ opts$view$data |>
 Les variables suivantes contenaient initialement des valeurs **manquantes** :
 
 ```{r}
-easy_view(df_qmd)$data |>
+get_vars_dict(df_qmd)$data |>
   filter(!is.na(n_miss)) |>
   select(variable, label, n_miss, p_miss) |>
-  gt_qmd()
+  tbl_qmd()
 ```
 
 Il paraissait normal que l'ensemble des sujets puissent ne pas tous être porteurs d'un diagnostic secondaire.
@@ -186,9 +177,9 @@ Les modalités des variables catégorielles `cat1` et `cat2` étaient les suivan
 ```{r}
 #| layout-ncol: 2
 
-gt_qmd(.val_cat[[1]])
+tbl_qmd(.val_cat[[1]])
 
-gt_qmd(.val_cat[[2]])
+tbl_qmd(.val_cat[[2]])
 ```
 
 Ces variables étaient considérées problématiques du fait d'un mélange de complications aiguës et de pathologies chroniques.
@@ -260,7 +251,7 @@ Les variables suivantes ont été créées sur la base des dates d'admission, de
 opts$view$data |>
   select(variable:p_miss) |>
   filter(str_starts(variable, "tt|death")) |>
-  gt_qmd()
+  tbl_qmd()
 ```
 
 Aucune erreur logique ne fut retrouvée.
@@ -282,7 +273,7 @@ Une variable catégorielle *"classes d'âges"* (`age_cat`) a été créée sur l
 opts$view$data |>
   select(variable:type, levels) |>
   filter(variable == "age_cat") |>
-  gt_qmd()
+  tbl_qmd()
 ```
 
 ### Exclusions
@@ -298,17 +289,17 @@ exclus_list <- list(
   map(
     ~ df_qmd |>
       relocate(names(.labels_qmd)) |>
-      easy_view() |>
+      get_vars_dict() |>
       pluck("data") |>
       filter(variable %in% .) |>
-      select(where(~ !is_null(unlist(.))), -pos)
+      select(where(~ !(is.character(.) && all(is.na(.)))), -pos)
   )
 ```
 
 1. **Excès de valeurs manquantes** :
 
 ```{r}
-gt_qmd(exclus_list$trop_miss)
+tbl_qmd(exclus_list$trop_miss)
 ```
 
 \
@@ -316,8 +307,8 @@ gt_qmd(exclus_list$trop_miss)
 2. **Interprétabilité trop incertaine** :
 
 ```{r}
-gt_qmd(exclus_list$pas_interp) |>
-  sub_missing(missing_text = "")
+tbl_qmd(exclus_list$pas_interp) |>
+  gt_only(sub_missing, missing_text = "")
 ```
 
 \
@@ -325,8 +316,8 @@ gt_qmd(exclus_list$pas_interp) |>
 3. **Pas ou plus d'utilité future** :
 
 ```{r}
-gt_qmd(exclus_list$pas_util) |>
-  sub_missing(missing_text = "")
+tbl_qmd(exclus_list$pas_util) |>
+  gt_only(sub_missing, missing_text = "")
 ```
 
 ### Gestion des valeurs aberrantes
@@ -336,15 +327,17 @@ Les valeurs jugées aberrantes ont été converties en **valeurs manquantes**.
 La proportion de valeurs manquantes pour chacune des variables suivantes était jugée raisonnable :
 
 ```{r}
-gt_qmd(.miss_data)
+tbl_qmd(.miss_data)
 ```
 
 ## Composition finale
 
 Ci-dessous le récapitulatif des variables analysées :
 
+{{< script scripts/tbl_view.R >}}
+
 ```{r}
-opts$view$output
+out_qmd(tbl_view)
 ```
 
 ```{r}
@@ -393,11 +386,10 @@ Les variables catégorielles ont pu être regroupées en 4 catégories :
 
 .title_uv_demo <- str_fig(
   title = .title_descr$uv[1],
-  acro = .acro,
-  qmd = TRUE
+  acro = .acro
 )
 
-include_graphics("output/fig_uv_demo.png")
+out_qmd(fig_uv$demo)
 ```
 
 \
@@ -406,7 +398,7 @@ include_graphics("output/fig_uv_demo.png")
 #| label: fig-uv-atcd
 #| fig-cap: !expr ".title_descr$uv[2]"
 
-include_graphics("output/fig_uv_atcd.png")
+out_qmd(fig_uv$atcd)
 ```
 
 \
@@ -416,7 +408,7 @@ include_graphics("output/fig_uv_atcd.png")
 #| out-width: 85%
 #| fig-cap: !expr ".title_descr$uv[3]"
 
-include_graphics("output/fig_uv_pv.png")
+out_qmd(fig_uv$pv)
 ```
 
 \
@@ -426,7 +418,7 @@ include_graphics("output/fig_uv_pv.png")
 #| out-width: 85%
 #| fig-cap: !expr ".title_descr$uv[4]"
 
-include_graphics("output/fig_uv_bio.png")
+out_qmd(fig_uv$bio)
 ```
 
 {{< script scripts/tbl_uv.R >}}
@@ -435,14 +427,14 @@ include_graphics("output/fig_uv_bio.png")
 #| label: tbl-uv-bin
 #| tbl-cap: !expr ".title_descr$uv[5]"
 
-tbl_uv_bin
+out_qmd(tbl_uv_bin)
 ```
 
 ```{r}
 #| label: tbl-uv-qt
 #| tbl-cap: !expr ".title_descr$uv[6]"
 
-tbl_uv_qt
+out_qmd(tbl_uv_qt)
 ```
 
 ::: callout-important
@@ -466,28 +458,28 @@ L'analyse précédente a été reproduite après croisement sur 2 variables :
 #| label: tbl-bv-ql-demo-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[1]"
 
-tbl_bv_ql$demo$demo_ev_death_30
+out_qmd(tbl_bv_ql$demo_ev_death_30)
 ```
 
 ```{r}
 #| label: tbl-bv-ql-atcd-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[2]"
 
-tbl_bv_ql$atcd$atcd_ev_death_30
+out_qmd(tbl_bv_ql$atcd_ev_death_30)
 ```
 
 ```{r}
 #| label: tbl-bv-ql-pv-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[3]"
 
-tbl_bv_ql$pv$pv_ev_death_30
+out_qmd(tbl_bv_ql$pv_ev_death_30)
 ```
 
 ```{r}
 #| label: tbl-bv-ql-bio-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[4]"
 
-tbl_bv_ql$bio$bio_ev_death_30
+out_qmd(tbl_bv_ql$bio_ev_death_30)
 ```
 
 {{< script scripts/tbl_bv_qt.R suffix=(1) >}}
@@ -496,14 +488,14 @@ tbl_bv_ql$bio$bio_ev_death_30
 #| label: tbl-bv-qt-bin-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[5]"
 
-tbl_bv_qt$bin$ev_death_30
+out_qmd(tbl_bv_qt$bin_ev_death_30)
 ```
 
 ```{r}
 #| label: tbl-bv-qt-qt-ev-death-30
 #| tbl-cap: !expr ".title_descr$death[6]"
 
-tbl_bv_qt$qt$ev_death_30
+out_qmd(tbl_bv_qt$qt_ev_death_30)
 ```
 
 ## Cathétérisme droit
@@ -514,28 +506,28 @@ tbl_bv_qt$qt$ev_death_30
 #| label: tbl-bv-ql-rhc-demo
 #| tbl-cap: !expr ".title_descr$rhc[1]"
 
-tbl_bv_ql$demo$demo_rhc
+out_qmd(tbl_bv_ql$demo_rhc)
 ```
 
 ```{r}
 #| label: tbl-bv-ql-rhc-atcd
 #| tbl-cap: !expr ".title_descr$rhc[2]"
 
-tbl_bv_ql$atcd$atcd_rhc
+out_qmd(tbl_bv_ql$atcd_rhc)
 ```
 
 ```{r}
 #| label: tbl-bv-ql-rhc-pv
 #| tbl-cap: !expr ".title_descr$rhc[3]"
 
-tbl_bv_ql$pv$pv_rhc
+out_qmd(tbl_bv_ql$pv_rhc)
 ```
 
 ```{r}
 #| label: tbl-bv-ql-rhc-bio
 #| tbl-cap: !expr ".title_descr$rhc[4]"
 
-tbl_bv_ql$bio$bio_rhc
+out_qmd(tbl_bv_ql$bio_rhc)
 ```
 
 {{< script scripts/tbl_bv_qt.R suffix=(2) >}}
@@ -544,14 +536,14 @@ tbl_bv_ql$bio$bio_rhc
 #| label: tbl-bv-qt-bin-rhc
 #| tbl-cap: !expr ".title_descr$rhc[5]"
 
-tbl_bv_qt$bin$rhc
+out_qmd(tbl_bv_qt$bin_rhc)
 ```
 
 ```{r}
 #| label: tbl-bv-qt-qt-rhc
 #| tbl-cap: !expr ".title_descr$rhc[6]"
 
-tbl_bv_qt$qt$rhc
+out_qmd(tbl_bv_qt$qt_rhc)
 ```
 
 # Score de propension
@@ -565,7 +557,7 @@ Un **score de propension** a été créé dans le but de minimiser ce biais pote
 Pour rappel, les variables suivantes comportaient des valeurs manquantes dans des proportions jugées raisonnables :
 
 ```{r}
-gt_qmd(.miss_data)
+tbl_qmd(.miss_data)
 ```
 
 Celles-ci ont toutes été traitées par **imputations multiples** en suivant la méthode des **forêts aléatoires** (10 imputations, 5 itérations).
@@ -585,7 +577,8 @@ Un modèle régression logistique a été réalisé afin de prédire la propensi
 
 ```{r}
 sp_vars_view |>
-  gt_qmd(font_size = 13, data_row.padding = 4)
+  tbl_qmd(font_size = 13) |>
+  gt_only(tab_options, data_row.padding = 4)
 ```
 
 La distribution du score de propension dans l'ensemble de la population était la suivante :
@@ -594,7 +587,7 @@ La distribution du score de propension dans l'ensemble de la population était l
 df_sp["sp"] |>
   tbl_wide_summary(statistic = opts$qt_stat_wide, digits = ~2) |>
   modify_header(stat_6 ~ str_glue("**{names(opts$qt_stat$mean)}**")) |>
-  gt_qmd()
+  tbl_qmd()
 ```
 
 ```{r}
@@ -616,8 +609,7 @@ df_sp["sp"] |>
 .title_sp_dist_match <- str_fig(
   title = .title_sp_dist$match,
   note = "Appariement 1:1 selon la méthode des plus proches voisins.
-    Caliper fixé à {.sp_dist_match$cal} (brut). {.sp_dist_match$n_pair} appariements réalisés sur {.sp_dist_match$total_pair} possibles, soit avec une correspondance de {.sp_dist_match$p_match}.",
-  qmd = TRUE
+    Caliper fixé à {.sp_dist_match$cal} (brut). {.sp_dist_match$n_pair} appariements réalisés sur {.sp_dist_match$total_pair} possibles, soit avec une correspondance de {.sp_dist_match$p_match}."
 )
 ```
 
@@ -632,7 +624,7 @@ La distribution du score de propension dans chaque groupe était la suivante
 #| lightbox:
 #|   group: fig-sp-dist
 
-include_graphics("output/fig_dist_global.png")
+out_qmd(fig_dist$global)
 ```
 
 Dans une situation où le score de propension prédirait parfaitement l'allocation du cathétérisme, il n'y aurait aucune observation située au-dessus de la ligne horizontale chez les sujets sans et aucune située en dessous chez les sujets avec.
@@ -655,7 +647,7 @@ Les performances supposées du score de propension ont pu être évaluées à l'
 #| out-width: 50%
 #| fig-cap: Courbe ROC du score de propension pour la classification du cathétérisme droit.
 
-include_graphics("output/fig_roc.png")
+out_qmd(fig_roc)
 ```
 
 Une telle aire sous la courbe témoignait d'une capacité discriminante **faible à modérée**.
@@ -693,7 +685,7 @@ Un caliper fixé à **`r .sp_dist_match$cal`** (`r .sp_dist_match$cal/0.2` \* 0.
 #| lightbox:
 #|   group: fig-sp-dist
 
-include_graphics("output/fig_dist_match.png")
+out_qmd(fig_dist$match)
 ```
 
 L'appariement semblait visuellement satisfaisant.
@@ -721,11 +713,10 @@ L'équilibrage des variables entre les groupes pouvait être évalué par le cal
   note = "{nrow(df_match) / 2} appariements sur le score propension
     selon un caliper fixé à {.sp_dist_match$cal} (brut). Les SMD
     étaient présentées en valeurs absolues et classées par valeurs
-    globales décroissantes.",
-  qmd = TRUE
+    globales décroissantes."
 )
 
-include_graphics("output/fig_smd.png")
+out_qmd(fig_smd)
 ```
 
 L'équilibrage entre les groupes après appariement sur le score de propension n'était pas parfait mais néanmoins considéré satisfaisant.
@@ -754,8 +745,12 @@ compar_df |>
       select(" " = term, "OR {opts$ci$label}" := estimate_ci, p.value)
   ) |>
   list_c() |>
-  gt_qmd() |>
-  tab_style(style = cell_text(align = "right"), locations = cells_body())
+  tbl_qmd() |>
+  gt_only(
+    tab_style,
+    style = cell_text(align = "right"),
+    locations = cells_body()
+  )
 ```
 
 \
@@ -791,8 +786,7 @@ Une courbe de survie a été produite selon la méthode de Kaplan-Meier, ainsi q
       cathétérisme droit, {.} ajustement."
     ),
     note = "Les courbes étaient construites suivant la méthode de Kaplan-Meier.
-      Aucune censure n'était observée avant la date de point.",
-    qmd = TRUE
+      Aucune censure n'était observée avant la date de point."
   )
 )
 ```
@@ -805,7 +799,7 @@ Une courbe de survie a été produite selon la méthode de Kaplan-Meier, ainsi q
 #| lightbox:
 #|   group: fig-surv
 
-include_graphics("output/fig_surv_non_ajusté.png")
+out_qmd(fig_surv$non_ajusté)
 ```
 
 # Après ajustement
@@ -816,7 +810,7 @@ include_graphics("output/fig_surv_non_ajusté.png")
 #| lightbox:
 #|   group: fig-surv
 
-include_graphics("output/fig_surv_ajusté.png")
+out_qmd(fig_surv$ajusté)
 ```
 :::
 

@@ -9,7 +9,7 @@ fig_roc <- df_sp |>
     x = 0.2,
     y = 0.85,
     size = 4,
-    family = opts$font
+    family = opts$font$alpha
   ) +
   annotation_custom(
     grob = df_sp |>
@@ -31,4 +31,4 @@ fig_roc <- df_sp |>
   labs(x = "Non-spécificité", y = "Sensibilité") +
   theme_bar(grid = FALSE)
 
-easy_out(fig_roc, height = 4, width = 4)
+easy_out(fig_roc, height = 4, width = 4, export = TRUE)

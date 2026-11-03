@@ -1,0 +1,13 @@
+project:
+  type: default
+  execute-dir: project
+  render:
+    - index.qmd
+
+lang: fr
+
+format:
+  hebstr-doc-html:
+    code-tools:
+      source: https://github.com/hebstr/m2-dm3
+  hebstr-doc-docx: {}

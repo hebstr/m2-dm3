@@ -17,4 +17,4 @@ fig_smd <- compar_df |>
   scale_color_manual(values = rev(opts$palette)) +
   theme_bar(grid = FALSE)
 
-easy_out(fig_smd, height = 6.5, width = 5)
+easy_out(fig_smd, height = 6.5, width = 5, export = TRUE)
